@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Profil{% endblock %}
+{% block body_class %}dashboard-page owner-theme{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Sol Sidebar -->
+    <aside class="sidebar owner-sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon owner-logo">
+                    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="36" height="36" rx="10" fill="#E67E22"/>
+                        <path d="M18 10C18 10 12 15 12 20C12 23.314 14.686 26 18 26C21.314 26 24 23.314 24 20C24 15 18 10 18 10Z" fill="white" fill-opacity="0.9"/>
+                    </svg>
+                </div>
+                <span class="logo-text"><strong>FOOD</strong> <span class="text-accent">BRIDGE</span></span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('owner_dashboard') }}" class="nav-item" id="nav-overview">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span>Genel Bakış</span>
+            </a>
+            <a href="{{ url_for('owner_dashboard') }}#envanter" class="nav-item" id="nav-inventory">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                </svg>
+                <span>Envanter</span>
+            </a>
+            <a href="{{ url_for('owner_report') }}" class="nav-item" id="nav-reports">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                </svg>
+                <span>Raporlar</span>
+            </a>
+            <a href="{{ url_for('owner_profile') }}" class="nav-item active" id="nav-profile">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Profil</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="nav-item logout-item owner-logout">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>OTURUMU KAPAT</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Ana İçerik -->
+    <main class="main-content">
+        <div class="page-content centered-content">
+            <div class="profile-card owner-profile-card">
+                <div class="profile-header-bg owner-header-bg"></div>
+                <div class="profile-avatar">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="1.5">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+
+                <h2 class="profile-name">{{ current_user.full_name }}</h2>
+
+                <span class="profile-type-badge owner-badge">
+                    👨‍🍳 STANDART
+                </span>
+
+                {% if restaurant %}
+                <div class="profile-restaurant">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    </svg>
+                    {{ restaurant.name }}
+                </div>
+                {% endif %}
+
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <span class="stat-label">PUAN</span>
+                        <span class="stat-value text-primary">{{ current_user.points }}</span>
+                    </div>
+                    <div class="profile-divider"></div>
+                    <div class="profile-stat">
+                        <span class="stat-label">BAĞIŞLAR</span>
+                        <span class="stat-value text-accent">{{ total_donations }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+{% block title %}Harita Keşfi{% endblock %}
+{% block body_class %}dashboard-page user-theme{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Sol Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon user-logo">
+                    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="36" height="36" rx="10" fill="#7C9A6E"/>
+                        <path d="M18 10C18 10 12 15 12 20C12 23.314 14.686 26 18 26C21.314 26 24 23.314 24 20C24 15 18 10 18 10Z" fill="white" fill-opacity="0.9"/>
+                    </svg>
+                </div>
+                <span class="logo-text"><strong>FOOD</strong> BRIDGE</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('user_dashboard') }}" class="nav-item active" id="nav-map">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>Harita Keşfi</span>
+            </a>
+            <a href="{{ url_for('user_profile') }}" class="nav-item" id="nav-profile">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Profil Bilgileri</span>
+            </a>
+            <a href="{{ url_for('user_report') }}" class="nav-item" id="nav-report">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                </svg>
+                <span>Etki Raporu</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="nav-item logout-item">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>ÇIKIŞ</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Ana İçerik -->
+    <main class="main-content">
+        <!-- Harita -->
+        <div class="map-container" id="map"></div>
+
+        <!-- Alt Durum Çubuğu -->
+        <div class="map-status-bar" id="status-bar">
+            <div class="status-info">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <div>
+                    <span class="status-label">DURUM</span>
+                    <span class="status-value" id="status-text">Harita yükleniyor...</span>
+                </div>
+            </div>
+            <div class="status-info">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <div>
+                    <span class="status-label">SEÇİMLER</span>
+                    <span class="status-value" id="selection-count">0 / 3 Ürün</span>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="submit-request-btn" onclick="submitRequest()" disabled>
+                TALEBİ ONAYLA
+            </button>
+        </div>
+    </main>
+</div>
+
+<!-- Restoran Detay Modalı -->
+<div class="modal-overlay" id="restaurant-modal" style="display:none">
+    <div class="modal-card restaurant-modal-card">
+        <div class="modal-header">
+            <div>
+                <h2 class="modal-title" id="modal-restaurant-name"></h2>
+                <div class="modal-meta">
+                    <span class="rating-badge" id="modal-rating">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        <span></span>
+                    </span>
+                    <span class="location-badge" id="modal-address">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        <span></span>
+                    </span>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+
+        <!-- Geri Sayım -->
+        <div class="countdown-bar">
+            <div class="countdown-left">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <div>
+                    <span class="countdown-label">EŞLEŞME GERİ SAYIMI</span>
+                    <span class="countdown-time" id="countdown-time">14:51</span>
+                </div>
+            </div>
+            <div class="countdown-right">
+                <span class="queue-label">KUYRUK</span>
+                <span class="queue-count" id="queue-count">0</span>
+                <span class="queue-suffix">Kişi</span>
+            </div>
+        </div>
+
+        <!-- Ürün Listesi -->
+        <div class="modal-body">
+            <div class="menu-header">
+                <h3 class="menu-title">ASKIDAKİ MENÜ</h3>
+                <span class="menu-limit">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    MAX 3 ÜRÜN
+                </span>
+            </div>
+            <div class="product-list" id="product-list">
+                <!-- Ürünler JavaScript ile doldurulacak -->
+            </div>
+        </div>
+
+        <!-- Greedy Matching açıklaması -->
+        <div class="matching-info">
+            <p>"Süre sonunda, talep yapan kullanıcılar arasından en yüksek <em>Öncelik Puanına</em> sahip olanlar
+            <em>Greedy Matching</em> algoritmasıyla otomatik olarak eşleştirilecektir."</p>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                GERİ DÖN
+            </button>
+            <button class="btn btn-primary btn-lg" id="modal-save-btn" onclick="saveSelections()" disabled>
+                SEÇİMLERİ KAYDET
+            </button>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+// Seçili ürünler
+let selectedProducts = [];
+let countdownInterval = null;
+
+// Harita başlatma
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+});
+
+function initMap() {
+    // Elazığ / Fırat Üniversitesi merkezi
+    const map = L.map('map').setView([38.6748, 39.1920], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // Restoranları yükle
+    fetch('/api/restaurants')
+        .then(r => r.json())
+        .then(restaurants => {
+            let activeCount = 0;
+            restaurants.forEach(r => {
+                // Askıda ürünü olan restoranlar farklı renk
+                const iconColor = r.has_suspended ? '#E67E22' : '#7C9A6E';
+                const iconSize = r.has_suspended ? [32, 42] : [25, 35];
+
+                const icon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div class="marker-pin" style="background:${iconColor}">
+                             <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                               <circle cx="12" cy="10" r="3" fill="${iconColor}"/>
+                             </svg>
+                           </div>
+                           <div class="marker-label">${r.name}</div>`,
+                    iconSize: iconSize,
+                    iconAnchor: [16, 42]
+                });
+
+                const marker = L.marker([r.lat, r.lon], { icon: icon }).addTo(map);
+                marker.on('click', () => openRestaurantModal(r.id));
+
+                if (r.has_suspended) activeCount++;
+            });
+
+            document.getElementById('status-text').textContent =
+                `${activeCount} restoranda askıda ürün mevcut`;
+        });
+}
+
+function openRestaurantModal(restaurantId) {
+    selectedProducts = [];
+    updateSelectionUI();
+
+    fetch(`/api/products/${restaurantId}`)
+        .then(r => r.json())
+        .then(data => {
+            const modal = document.getElementById('restaurant-modal');
+            document.getElementById('modal-restaurant-name').textContent = data.restaurant.name;
+            document.getElementById('modal-rating').querySelector('span:last-child').textContent = data.restaurant.rating + ' PUAN';
+            document.getElementById('modal-address').querySelector('span:last-child').textContent = 'LOKASYONDA';
+            document.getElementById('queue-count').textContent = data.queue_count;
+
+            // Ürün listesi
+            const list = document.getElementById('product-list');
+            list.innerHTML = '';
+
+            if (data.products.length === 0) {
+                list.innerHTML = '<p class="empty-message">Bu restoranda şu an askıda ürün bulunmuyor.</p>';
+            } else {
+                data.products.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.dataset.productId = p.id;
+                    card.innerHTML = `
+                        <div class="product-info">
+                            <h4 class="product-name">${p.name}</h4>
+                            <div class="product-pricing">
+                                <span class="original-price">₺${p.original_price.toFixed(0)}</span>
+                                <div class="special-price">
+                                    <span class="price-label">ÖZEL FİYAT</span>
+                                    <span class="price-value">₺${p.price.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="product-select-btn" onclick="toggleProduct(${p.id}, this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </button>
+                    `;
+                    list.appendChild(card);
+                });
+            }
+
+            // Geri sayım başlat
+            startCountdown();
+
+            modal.style.display = 'flex';
+        });
+}
+
+function toggleProduct(productId, btn) {
+    const idx = selectedProducts.indexOf(productId);
+    if (idx > -1) {
+        selectedProducts.splice(idx, 1);
+        btn.classList.remove('selected');
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>`;
+    } else if (selectedProducts.length < 3) {
+        selectedProducts.push(productId);
+        btn.classList.add('selected');
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>`;
+    }
+    updateSelectionUI();
+}
+
+function updateSelectionUI() {
+    document.getElementById('selection-count').textContent = `${selectedProducts.length} / 3 Ürün`;
+    document.getElementById('modal-save-btn').disabled = selectedProducts.length === 0;
+    document.getElementById('submit-request-btn').disabled = selectedProducts.length === 0;
+}
+
+function startCountdown() {
+    let totalSeconds = 15 * 60; // 15 dakika
+    if (countdownInterval) clearInterval(countdownInterval);
+
+    countdownInterval = setInterval(() => {
+        totalSeconds--;
+        if (totalSeconds <= 0) {
+            clearInterval(countdownInterval);
+            document.getElementById('countdown-time').textContent = '00:00';
+            return;
+        }
+        const min = Math.floor(totalSeconds / 60);
+        const sec = totalSeconds % 60;
+        document.getElementById('countdown-time').textContent =
+            `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }, 1000);
+}
+
+function saveSelections() {
+    closeModal();
+}
+
+function submitRequest() {
+    if (selectedProducts.length === 0) return;
+
+    fetch('/api/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_ids: selectedProducts })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            selectedProducts = [];
+            updateSelectionUI();
+        } else {
+            showNotification(data.error || 'Bir hata oluştu', 'error');
+        }
+    })
+    .catch(() => showNotification('Bağlantı hatası!', 'error'));
+}
+
+function closeModal() {
+    document.getElementById('restaurant-modal').style.display = 'none';
+    if (countdownInterval) clearInterval(countdownInterval);
+}
+
+function showNotification(message, type) {
+    const container = document.getElementById('flash-container') || (() => {
+        const div = document.createElement('div');
+        div.className = 'flash-container';
+        div.id = 'flash-container';
+        document.body.prepend(div);
+        return div;
+    })();
+
+    const flash = document.createElement('div');
+    flash.className = `flash-message flash-${type}`;
+    flash.innerHTML = `<span>${message}</span><button class="flash-close" onclick="this.parentElement.remove()">&times;</button>`;
+    container.appendChild(flash);
+
+    setTimeout(() => flash.remove(), 4000);
+}
+</script>
+{% endblock %}
+{% endblock %}
