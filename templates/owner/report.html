@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Raporlar{% endblock %}
+{% block body_class %}dashboard-page owner-theme{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    <!-- Sol Sidebar -->
+    <aside class="sidebar owner-sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon owner-logo">
+                    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="36" height="36" rx="10" fill="#E67E22"/>
+                        <path d="M18 10C18 10 12 15 12 20C12 23.314 14.686 26 18 26C21.314 26 24 23.314 24 20C24 15 18 10 18 10Z" fill="white" fill-opacity="0.9"/>
+                    </svg>
+                </div>
+                <span class="logo-text"><strong>FOOD</strong> <span class="text-accent">BRIDGE</span></span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('owner_dashboard') }}" class="nav-item" id="nav-overview">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span>Genel Bakış</span>
+            </a>
+            <a href="{{ url_for('owner_dashboard') }}#envanter" class="nav-item" id="nav-inventory">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                </svg>
+                <span>Envanter</span>
+            </a>
+            <a href="{{ url_for('owner_report') }}" class="nav-item active" id="nav-reports">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                </svg>
+                <span>Raporlar</span>
+            </a>
+            <a href="{{ url_for('owner_profile') }}" class="nav-item" id="nav-profile">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>Profil</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('logout') }}" class="nav-item logout-item owner-logout">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>OTURUMU KAPAT</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Ana İçerik -->
+    <main class="main-content">
+        <div class="page-content">
+            <!-- Başlık -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Toplumsal Etki</h1>
+                    <p class="page-subtitle">Verilerle iyiliği takip ediyoruz.</p>
+                </div>
+                <div class="header-actions">
+                    <a href="{{ url_for('api_export_csv') }}" class="btn btn-outline">CSV İndir</a>
+                    <button class="btn btn-primary" onclick="window.print()">Paylaş</button>
+                </div>
+            </div>
+
+            <!-- İstatistik Kartları -->
+            <div class="stats-grid stats-3">
+                <div class="stat-card">
+                    <div class="stat-icon green-bg">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2D6A4F" stroke-width="2">
+                            <polyline points="3 6 5 6 7 20"/>
+                            <path d="M7 20h14l-2-12H5"/>
+                        </svg>
+                    </div>
+                    <span class="stat-number text-green">{{ stats.food_saved_kg }}</span>
+                    <span class="stat-unit">Kg</span>
+                    <span class="stat-desc">ÖNLENEN GIDA ATIĞI</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange-bg">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#E67E22" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                        </svg>
+                    </div>
+                    <span class="stat-number text-orange">{{ stats.happy_users }}</span>
+                    <span class="stat-desc">MUTLU KULLANICI</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue-bg">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2">
+                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0118.8-4.3M22 12.5a10 10 0 01-18.8 4.2"/>
+                        </svg>
+                    </div>
+                    <span class="stat-number text-blue">{{ stats.co2_saved_kg }}</span>
+                    <span class="stat-unit">Kg</span>
+                    <span class="stat-desc">CO2 TASARRUFU</span>
+                </div>
+            </div>
+
+            <!-- Grafik Alanı -->
+            <div class="chart-section">
+                <div class="chart-header">
+                    <div>
+                        <h2 class="section-title">Topluluk Gelişimi</h2>
+                        <p class="section-subtitle">Son 7 günlük porsiyon paylaşım verileri</p>
+                    </div>
+                    <div class="chart-info-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        En çok bağış yapılan gün:
+                        <strong class="text-accent">Cuma</strong>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="bar-chart" id="bar-chart">
+                        {% set max_day = stats.daily_stats.values()|max if stats.daily_stats.values()|list else 1 %}
+                        {% for day, count in stats.daily_stats.items() %}
+                        <div class="bar-item">
+                            <div class="bar-wrapper">
+                                <div class="bar owner-bar" style="height: {{ (count / (max_day if max_day > 0 else 1)) * 100 }}%"></div>
+                            </div>
+                            <span class="bar-label">GÜN {{ loop.index }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

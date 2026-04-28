@@ -1,0 +1,91 @@
+ASKIDA YEMEK PROJESİ WINFRAMELER VE AÇIKLAMALARI
+
+
+1. Müşteri (User) Ekranları
+İhtiyaç sahiplerinin sisteme eriştiği bu bölüm, gıdaya ulaşımı kolaylaştırmak ve adil dağıtımı sağlamak için tasarlanmıştır.
+Giriş ve Rol Seçimi (Auth Screen):
+Neden Var: Sisteme güvenli erişim sağlamak ve kullanıcıyı rolüne göre (Müşteri/Owner) ilgili arayüze yönlendirmek için kullanılır.
+Teknik Detay: SQLAlchemy üzerinden Users tablosundaki kimlik bilgileri doğrulanır. Kullanıcının user_type bilgisine göre yetkilendirme yapılarak arayüz dinamik olarak yüklenir.
+
+
+Harita Keşfi Dashboard (Map Dashboard):
+Neden Var: Kullanıcının çevresindeki bağış yapan restoranları görsel olarak bulması için merkezi bir paneldir.
+Teknik Detay: tkintermapview kütüphanesi kullanılarak OpenStreetMap verileri üzerine Restaurants tablosundaki koordinatlar (lat, lon) marker olarak işlenir. "Askıda" ürünü olan restoranlar, veritabanı sorgusuyla tespit edilerek haritada farklı ikonlarla (marker) vurgulanır.
+
+
+
+
+
+
+
+
+
+  Ürün Detay ve Talep Modalı (Product Request Popup):
+Neden Var: Seçilen restoranın bağışladığı ürünleri incelemek ve talep oluşturmak için kullanılır.
+Teknik Detay: Haritadaki bir restorana tıklandığında, o restoranın res_id'si ile eşleşen ve durumu "Suspended/Askıda" olan ürünler Products tablosundan çekilir. "Talep Et" butonuna basıldığında, sistem kullanıcının tipi üzerinden (öğrenci, engelli vb.) bir Öncelik Skoru ($P$) hesaplar.
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Etki Raporu ve İşlem Geçmişi (Impact Report & History):
+Neden Var: Kullanıcının geçmiş taleplerini takip etmesi ve toplumsal faydayı görmesi için motivasyon amaçlıdır.
+Teknik Detay: Transactions tablosundaki veriler Pandas kullanılarak analiz edilir. Toplam kurtarılan gıda miktarı gibi istatistikler arayüzde görselleştirilir ve istenirse CSV raporu olarak sunulur.
+
+
+
+
+
+
+
+
+
+2. Restoran Sahibi (Owner) Ekranları
+Restoran sahiplerinin envanter yönetimi yaptığı ve bağış sürecini kontrol ettiği profesyonel yönetim panelidir.
+Envanter Yönetimi Paneli (Inventory Management):
+Neden Var: Restoranın elindeki ürünleri sisteme girmesi ve stok takibi yapması için kullanılır.
+Teknik Detay: Restoran sahibi yeni ürün eklediğinde, ürün adı, miktarı ve SKT (Son Tüketim Tarihi) bilgileri SQLAlchemy üzerinden Products tablosuna kaydedilir.
+Otomatik ve Manuel İlan Paneli:
+Neden Var: Ürünlerin bağış statüsünü belirlemek için kullanılır.
+Teknik Detay: Sistem, SKT'sine 6 saatten az kalmış ürünleri otomatik olarak "Askıda" statüsüne geçirir. Ayrıca sahip, elinde kalan fazla porsiyonları manuel olarak anlık bağışa yükleyebilir. Bu durum veritabanında status sütununu güncelleyerek ürünün müşteri haritasında görünmesini sağlar.
+Eşleştirme ve Teslimat Takibi (Matching & Delivery):
+Neden Var: Taleplerin kiminle eşleştiğini görmek ve teslimatı yönetmek için kullanılır.
+Teknik Detay: 15 dakikalık "Talep Toplama" süresi bittiğinde , arka planda heapq tabanlı bir öncelik kuyruğu oluşturulur. Greedy Matching algoritması çalışarak en yüksek puanlı kullanıcıyı belirler ve eşleşmeyi Transactions tablosuna başarılı olarak işler.
+Raporlama ve Analiz Ekranı:
+Neden Var: Restoranın bağış performansını ve geçmiş işlemlerini raporlaması için kullanılır.
+Teknik Detay: Tüm başarılı eşleşmeler Pandas kütüphanesi ile işlenerek , gıda israfını önleme verileri (kg bazında) istatistiksel grafiklere dönüştürülür ve CSV çıktısı üretilir.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
