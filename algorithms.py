@@ -12,6 +12,7 @@ Teknik Rapor - Bölüm 4: Sistem Çalışma Mantığı ve Algoritmalar
 
 import heapq
 import random
+import pandas as pd
 from datetime import datetime, timezone, timedelta
 from models import db, Product, Transaction, User
 
@@ -128,8 +129,11 @@ def greedy_matching(product_id):
     # 6 Haneli Teslimat PIN Kodu Üret
     winner.pin_code = str(random.randint(100000, 999999))
 
-    # Ürünü eşleştirildi olarak işaretle
-    product.status = 'matched'
+    # Miktarı düşür, 0 olursa durumu güncelle
+    product.quantity -= 1
+    if product.quantity <= 0:
+        product.status = 'matched'
+        product.quantity = 0
 
     # Kullanıcıya puan ekle
     user = User.query.get(winner.user_id)
@@ -221,18 +225,7 @@ def auto_suspend_expiring_products():
 
 def get_impact_stats(user_id=None, restaurant_id=None):
     """
-    Etki Raporu İstatistikleri.
-    Wireframe: Toplumsal Etki ekranı
-        - Önlenen gıda atığı (kg)
-        - Mutlu kullanıcı sayısı
-        - CO2 tasarrufu (kg)
-
-    Args:
-        user_id: Belirli kullanıcı için filtre (opsiyonel)
-        restaurant_id: Belirli restoran için filtre (opsiyonel)
-
-    Returns:
-        dict: İstatistik verileri
+    Etki Raporu İstatistikleri (Pandas ile Gerçek Veri Analizi).
     """
     query = Transaction.query.filter(
         Transaction.status.in_(['matched', 'completed'])
@@ -245,7 +238,34 @@ def get_impact_stats(user_id=None, restaurant_id=None):
 
     transactions = query.all()
 
-    total_matched = len(transactions)
+    if not transactions:
+        # Boş veri döndür
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        return {
+            'total_matched': 0,
+            'food_saved_kg': 0.0,
+            'co2_saved_kg': 0.0,
+            'happy_users': 0,
+            'daily_stats': {today: 0}
+        }
+
+    # Pandas DataFrame oluştur
+    data = []
+    for t in transactions:
+        data.append({
+            'created_at': t.created_at,
+            'user_id': t.user_id,
+            'user_rating': t.user_rating,
+            'status': t.status
+        })
+
+    df = pd.DataFrame(data)
+    
+    # Tarih bazlı gruplama için UTC'yi datetime'a çevir
+    # Zaman damgalarından saat kısmını atıp sadece tarihi alıyoruz
+    df['date'] = pd.to_datetime(df['created_at']).dt.strftime('%Y-%m-%d')
+
+    total_matched = len(df)
 
     # Her porsiyon ortalama 0.5 kg olarak hesaplanır
     total_food_saved_kg = total_matched * 0.5
@@ -253,25 +273,27 @@ def get_impact_stats(user_id=None, restaurant_id=None):
     # CO2 tasarrufu: her kg gıda israfı ortalama 2.2 kg CO2 üretir
     co2_saved_kg = round(total_food_saved_kg * 2.2, 1)
 
-    # Benzersiz mutlu kullanıcı sayısı
-    unique_users = len(set(t.user_id for t in transactions))
+    # Mutlu Kullanıcı: 4 veya 5 yıldız veren benzersiz kullanıcılar
+    # (Henüz puan vermeyenleri veya 3 ve altı verenleri "mutlu" saymıyoruz)
+    happy_users_df = df[df['user_rating'] >= 4]
+    unique_happy_users = happy_users_df['user_id'].nunique()
 
-    # Son 7 günlük dağılım
-    daily_stats = {}
-    for i in range(7):
-        day = datetime.now(timezone.utc) - timedelta(days=6 - i)
-        day_str = day.strftime('%Y-%m-%d')
-        daily_stats[day_str] = 0
+    # Son 7 günlük dağılımı Pandas ile bulma
+    # Önce son 7 günün tam bir tarih dizisini (index) oluştur
+    end_date = pd.Timestamp.utcnow().floor('D')
+    start_date = end_date - pd.Timedelta(days=6)
+    date_range = pd.date_range(start=start_date, end=end_date, freq='D').strftime('%Y-%m-%d')
 
-    for t in transactions:
-        day_str = t.created_at.strftime('%Y-%m-%d')
-        if day_str in daily_stats:
-            daily_stats[day_str] += 1
+    # Günlük gruplama yap
+    daily_counts = df.groupby('date').size()
+
+    # Eğer o günde hiç sipariş yoksa 0 yazarak sözlüğü doldur
+    daily_stats = {d: int(daily_counts.get(d, 0)) for d in date_range}
 
     return {
         'total_matched': total_matched,
         'food_saved_kg': round(total_food_saved_kg, 1),
         'co2_saved_kg': co2_saved_kg,
-        'happy_users': unique_users,
+        'happy_users': unique_happy_users,
         'daily_stats': daily_stats
     }

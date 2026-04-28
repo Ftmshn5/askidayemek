@@ -222,10 +222,18 @@ def user_profile():
         status='matched'
     ).order_by(Transaction.matched_at.desc()).all()
 
+    # Teslim Alınmış ama Puanlanmamış Talepler
+    completed_transactions = Transaction.query.filter_by(
+        user_id=current_user.id,
+        status='completed',
+        user_rating=None
+    ).order_by(Transaction.completed_at.desc()).limit(5).all()
+
     return render_template(
         'user/profile.html', 
         total_requests=total_requests,
-        active_transactions=active_transactions
+        active_transactions=active_transactions,
+        completed_transactions=completed_transactions
     )
 
 
@@ -633,6 +641,44 @@ def api_create_request():
         'transactions': created_transactions,
         'matched_count': 0
     })
+
+@app.route('/api/rate_transaction', methods=['POST'])
+@login_required
+def api_rate_transaction():
+    """Kullanıcının teslim aldığı işlemi puanlaması."""
+    if current_user.role != 'user':
+        return jsonify({'error': 'Yetkiniz yok'}), 403
+
+    data = request.get_json()
+    transaction_id = data.get('transaction_id')
+    rating = data.get('rating')
+
+    if not transaction_id or not rating:
+        return jsonify({'error': 'Eksik veri'}), 400
+
+    try:
+        rating = int(rating)
+        if rating < 1 or rating > 5:
+            raise ValueError()
+    except ValueError:
+        return jsonify({'error': 'Geçersiz puan'}), 400
+
+    transaction = Transaction.query.get(transaction_id)
+    if not transaction or transaction.user_id != current_user.id:
+        return jsonify({'error': 'İşlem bulunamadı'}), 404
+
+    if transaction.status != 'completed':
+        return jsonify({'error': 'Sadece teslim alınmış işlemleri puanlayabilirsiniz'}), 400
+
+    if transaction.user_rating:
+        return jsonify({'error': 'Bu işlemi zaten puanladınız'}), 400
+
+    transaction.user_rating = rating
+    current_user.points += 5  # Puan verdiği için ödül puan
+    
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'Puanınız kaydedildi, +5 Güven Puanı kazandınız!'})
 
 
 @app.route('/api/export/csv')

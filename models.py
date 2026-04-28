@@ -97,7 +97,6 @@ class Restaurant(db.Model):
     name = db.Column(db.String(150), nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
-    rating = db.Column(db.Float, default=4.0)
     address = db.Column(db.String(300), default='')
 
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -111,6 +110,15 @@ class Restaurant(db.Model):
         return Product.query.filter_by(
             restaurant_id=self.id, status='suspended'
         ).count()
+
+    @property
+    def rating(self):
+        """İşlemlerden alınan puanların ortalaması."""
+        transactions = Transaction.query.filter_by(restaurant_id=self.id).filter(Transaction.user_rating != None).all()
+        if not transactions:
+            return 4.0  # Varsayılan başlangıç puanı
+        total = sum(t.user_rating for t in transactions)
+        return round(total / len(transactions), 1)
 
     @property
     def total_products(self):
@@ -201,6 +209,9 @@ class Transaction(db.Model):
 
     # Durum: pending, matched, completed, cancelled
     status = db.Column(db.String(20), nullable=False, default='pending')
+
+    # Kullanıcının teslimat sonrası restorana verdiği puan (1-5)
+    user_rating = db.Column(db.Integer, nullable=True)
 
     # Teslimat Doğrulama PIN Kodu (Örn: '4825')
     pin_code = db.Column(db.String(10), nullable=True)
