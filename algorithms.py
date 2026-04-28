@@ -11,6 +11,7 @@ Teknik Rapor - Bölüm 4: Sistem Çalışma Mantığı ve Algoritmalar
 """
 
 import heapq
+import random
 from datetime import datetime, timezone, timedelta
 from models import db, Product, Transaction, User
 
@@ -123,6 +124,9 @@ def greedy_matching(product_id):
 
     winner.status = 'matched'
     winner.matched_at = now
+    
+    # 6 Haneli Teslimat PIN Kodu Üret
+    winner.pin_code = str(random.randint(100000, 999999))
 
     # Ürünü eşleştirildi olarak işaretle
     product.status = 'matched'

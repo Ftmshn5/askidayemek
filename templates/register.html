@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ t.login.title }}{% endblock %}
+{% block title %}{{ t.register.title }}{% endblock %}
 {% block body_class %}login-page{% endblock %}
 
 {% block body %}
@@ -16,16 +16,6 @@
             </div>
             <h1 class="decoration-title">ASKIDA<br>YEMEK</h1>
             <p class="decoration-text">{{ t.decoration.slogan | safe }}</p>
-            <div class="decoration-stats">
-                <div class="stat-item">
-                    <span class="stat-number">142</span>
-                    <span class="stat-label">{{ t.decoration.stat_food }}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">84</span>
-                    <span class="stat-label">{{ t.decoration.stat_users }}</span>
-                </div>
-            </div>
         </div>
         <div class="decoration-shapes">
             <div class="shape shape-1"></div>
@@ -34,8 +24,8 @@
         </div>
     </div>
 
-    <!-- Sağ Login Formu -->
-    <div class="login-form-area">
+    <!-- Sağ Register Formu -->
+    <div class="login-form-area" style="overflow-y: auto;">
         <div class="login-card">
             <div class="login-logo">
                 <div class="logo-icon">
@@ -44,8 +34,8 @@
                         <path d="M24 14C24 14 16 20 16 27C16 31.418 19.582 35 24 35C28.418 35 32 31.418 32 27C32 20 24 14 24 14Z" fill="white" fill-opacity="0.9"/>
                     </svg>
                 </div>
-                <h2 class="login-title">ASKIDA YEMEK</h2>
-                <p class="login-subtitle" id="login-subtitle">{{ t.login.subtitle_user }}</p>
+                <h2 class="login-title">{{ t.register.title | upper }}</h2>
+                <p class="login-subtitle">{{ t.login.subtitle_user }}</p>
             </div>
 
             <!-- Rol Seçimi Tabları -->
@@ -66,89 +56,68 @@
                 </button>
             </div>
 
-            <!-- Login Formu -->
-            <form method="POST" action="{{ url_for('login') }}" class="login-form" id="login-form">
+            <!-- Register Formu -->
+            <form method="POST" action="{{ url_for('register') }}" class="login-form" id="register-form">
                 <input type="hidden" name="role" id="role-input" value="owner">
+
+                <div class="form-group">
+                    <label for="full_name" class="form-label">{{ t.register.full_name }}</label>
+                    <input type="text" name="full_name" id="full_name" class="form-input"
+                           placeholder="{{ t.register.full_name_placeholder }}" required>
+                </div>
+                
+                <div class="form-group" id="restaurant-group">
+                    <label for="restaurant_name" class="form-label">{{ t.register.restaurant_name }}</label>
+                    <input type="text" name="restaurant_name" id="restaurant_name" class="form-input"
+                           placeholder="{{ t.register.restaurant_name_placeholder }}">
+                </div>
 
                 <div class="form-group">
                     <label for="username" class="form-label">{{ t.login.username }}</label>
                     <input type="text" name="username" id="username" class="form-input"
-                           placeholder="{{ t.login.username_placeholder }}" required autocomplete="username">
+                           placeholder="{{ t.register.username_placeholder }}" required>
                 </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">{{ t.login.password }}</label>
                     <input type="password" name="password" id="password" class="form-input"
-                           placeholder="{{ t.login.password_placeholder }}" required autocomplete="current-password">
+                           placeholder="{{ t.register.password_placeholder }}" required minlength="6">
                 </div>
 
-                <button type="submit" class="login-btn" id="login-btn">
-                    {{ t.login.submit_owner }}
+                <button type="submit" class="login-btn owner-btn" id="login-btn">
+                    {{ t.register.submit }}
                 </button>
                 
                 <div style="text-align: center; margin-top: 15px;">
-                    <a href="{{ url_for('guest_dashboard') }}" style="color: #7C9A6E; text-decoration: none; font-weight: 500; font-size: 14px; border-bottom: 1px dashed #7C9A6E;">
-                        {{ t.login.guest_link }}
-                    </a>
-                </div>
-                
-                <div style="text-align: center; margin-top: 10px;">
-                    <span style="font-size: 14px; color: #6B7280;">{{ t.login.no_account }}</span>
-                    <a href="{{ url_for('register') }}" style="color: #7C9A6E; text-decoration: none; font-weight: 600; font-size: 14px; margin-left: 5px;">
-                        {{ t.login.register_link }}
+                    <span style="font-size: 14px; color: #6B7280;">{{ t.register.has_account }}</span>
+                    <a href="{{ url_for('login') }}" style="color: #7C9A6E; text-decoration: none; font-weight: 600; font-size: 14px; margin-left: 5px;">
+                        {{ t.register.login_link }}
                     </a>
                 </div>
             </form>
-
-            <!-- Demo bilgi -->
-            <div class="demo-info">
-                <p class="demo-title">{{ t.login.demo_title }}</p>
-                <div class="demo-accounts">
-                    <div class="demo-account" onclick="fillDemo('lezzet_sofrasi', '123456', 'owner')">
-                        <span class="demo-role">👨‍🍳</span>
-                        <span>lezzet_sofrasi</span>
-                    </div>
-                    <div class="demo-account" onclick="fillDemo('ahmet_yilmaz', '123456', 'user')">
-                        <span class="demo-role">👤</span>
-                        <span>ahmet_yilmaz</span>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
-const LANG = {
-    submit_owner: "{{ t.login.submit_owner }}",
-    submit_user: "{{ t.login.submit_user }}",
-    subtitle_owner: "{{ t.login.subtitle_owner }}",
-    subtitle_user: "{{ t.login.subtitle_user }}"
-};
-
 function switchRole(role) {
     document.getElementById('role-input').value = role;
     document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('tab-' + role).classList.add('active');
 
     const btn = document.getElementById('login-btn');
-    const subtitle = document.getElementById('login-subtitle');
+    const restGroup = document.getElementById('restaurant-group');
+    const restInput = document.getElementById('restaurant_name');
 
     if (role === 'owner') {
-        btn.textContent = LANG.submit_owner;
         btn.className = 'login-btn owner-btn';
-        subtitle.textContent = LANG.subtitle_owner;
+        restGroup.style.display = 'block';
+        restInput.setAttribute('required', 'required');
     } else {
-        btn.textContent = LANG.submit_user;
         btn.className = 'login-btn user-btn';
-        subtitle.textContent = LANG.subtitle_user;
+        restGroup.style.display = 'none';
+        restInput.removeAttribute('required');
     }
-}
-
-function fillDemo(username, password, role) {
-    document.getElementById('username').value = username;
-    document.getElementById('password').value = password;
-    switchRole(role);
 }
 </script>
 {% endblock %}

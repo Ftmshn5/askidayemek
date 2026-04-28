@@ -1,0 +1,214 @@
+{
+    "tr": {
+        "app_name": "ASKIDA YEMEK",
+        "login": {
+            "title": "Giriş Yap",
+            "username": "Kullanıcı Adı",
+            "username_placeholder": "Kullanıcı adınızı girin",
+            "password": "Şifre",
+            "password_placeholder": "Şifrenizi girin",
+            "submit_owner": "SİSTEME BAĞLAN",
+            "submit_user": "GİRİŞ YAP",
+            "guest_link": "Misafir Olarak Haritayı Keşfet",
+            "no_account": "Hesabınız yok mu?",
+            "register_link": "Kayıt Ol",
+            "demo_title": "Demo Hesaplar",
+            "subtitle_owner": "Yönetim ve Paylaşım Paneli",
+            "subtitle_user": "Gıda Paylaşım Platformu",
+            "role_owner": "RESTORAN",
+            "role_user": "İHTİYAÇ SAHİBİ"
+        },
+        "register": {
+            "title": "Kayıt Ol",
+            "full_name": "Ad Soyad",
+            "full_name_placeholder": "Adınızı ve soyadınızı girin",
+            "restaurant_name": "Restoran Adı",
+            "restaurant_name_placeholder": "Restoranınızın adını girin",
+            "username_placeholder": "Kullanıcı adı belirleyin",
+            "password_placeholder": "Şifre belirleyin",
+            "submit": "KAYIT OL",
+            "has_account": "Zaten hesabınız var mı?",
+            "login_link": "Giriş Yap"
+        },
+        "dashboard": {
+            "title": "Harita Keşfi",
+            "status": "DURUM",
+            "loading": "Harita yükleniyor...",
+            "selections": "SEÇİMLER",
+            "product_unit": "Ürün",
+            "submit_request": "TALEBİ ONAYLA",
+            "filter_active": "Sadece Aktifler",
+            "filter_all": "Tümünü Göster",
+            "active_restaurants": "restoranda askıda ürün mevcut",
+            "guest_text": "Şu an bölgenizde askıda yemeği olan",
+            "guest_suffix": "restoran var!"
+        },
+        "sidebar": {
+            "map": "Harita Keşfi",
+            "profile": "Profil Bilgileri",
+            "report": "Etki Raporu",
+            "logout": "ÇIKIŞ",
+            "overview": "Genel Bakış",
+            "inventory": "Envanter",
+            "reports": "Raporlar"
+        },
+        "owner": {
+            "title": "Restoran Yönetim Paneli",
+            "total_products": "TOPLAM ÜRÜN",
+            "suspended": "ASKIDA OLANLAR",
+            "today_donations": "BUGÜNKÜ BAĞIŞ",
+            "critical_skt": "KRİTİK SKT",
+            "pending_title": "Teslimat Bekleyenler (PIN Onayı)",
+            "col_user": "KULLANICI",
+            "col_product": "ÜRÜN",
+            "col_time": "EŞLEŞME ZAMANI",
+            "col_pin": "PIN DOĞRULAMA",
+            "pin_placeholder": "6 Haneli PIN",
+            "verify_btn": "ONAYLA",
+            "no_pending": "Şu anda teslimat bekleyen eşleşme bulunmuyor.",
+            "inventory_title": "Ürün Envanteri",
+            "add_product": "YENİ ÜRÜN EKLE",
+            "badge_hero": "SIFIR ATIK KAHRAMANI"
+        },
+        "modal": {
+            "countdown": "EŞLEŞME GERİ SAYIMI",
+            "queue": "KUYRUK",
+            "queue_suffix": "Kişi",
+            "menu_title": "ASKIDAKİ MENÜ",
+            "menu_limit": "MAX 3 ÜRÜN",
+            "matching_info": "Süre sonunda, talep yapan kullanıcılar arasından en yüksek Öncelik Puanına sahip olanlar Greedy Matching algoritmasıyla otomatik olarak eşleştirilecektir.",
+            "back": "GERİ DÖN",
+            "save": "SEÇİMLERİ KAYDET",
+            "no_products": "Bu restoranda şu an askıda ürün bulunmuyor.",
+            "special_price": "ÖZEL FİYAT"
+        },
+        "profile": {
+            "title": "Profil Bilgileri",
+            "points": "PUAN",
+            "requests": "TALEPLER",
+            "pending_title": "Teslimat Bekleyen Yemekleriniz",
+            "pin_label": "TESLİMAT PIN KODU"
+        },
+        "messages": {
+            "welcome": "Hoş geldiniz",
+            "login_error": "Kullanıcı adı veya şifre hatalı!",
+            "register_success": "Kayıt başarılı! Şimdi giriş yapabilirsiniz.",
+            "username_taken": "Bu kullanıcı adı zaten alınmış.",
+            "daily_limit": "Günlük maksimum 3 restoran talep limitine ulaştınız.",
+            "pin_verified": "PIN Doğrulandı! Teslimat başarılı, kullanıcıya +10 Güven Puanı eklendi.",
+            "pin_wrong": "Hatalı PIN kodu!",
+            "guest_warning": "Yemek talep edebilmek için giriş yapmalısınız."
+        },
+        "decoration": {
+            "slogan": "Gıda israfına karşı<br>toplumsal dayanışma",
+            "stat_food": "Kg Gıda Kurtarıldı",
+            "stat_users": "Mutlu Kullanıcı"
+        }
+    },
+    "en": {
+        "app_name": "ASKIDA YEMEK",
+        "login": {
+            "title": "Login",
+            "username": "Username",
+            "username_placeholder": "Enter your username",
+            "password": "Password",
+            "password_placeholder": "Enter your password",
+            "submit_owner": "CONNECT TO SYSTEM",
+            "submit_user": "LOGIN",
+            "guest_link": "Explore the Map as Guest",
+            "no_account": "Don't have an account?",
+            "register_link": "Sign Up",
+            "demo_title": "Demo Accounts",
+            "subtitle_owner": "Management and Sharing Panel",
+            "subtitle_user": "Food Sharing Platform",
+            "role_owner": "RESTAURANT",
+            "role_user": "BENEFICIARY"
+        },
+        "register": {
+            "title": "Sign Up",
+            "full_name": "Full Name",
+            "full_name_placeholder": "Enter your full name",
+            "restaurant_name": "Restaurant Name",
+            "restaurant_name_placeholder": "Enter your restaurant name",
+            "username_placeholder": "Choose a username",
+            "password_placeholder": "Choose a password",
+            "submit": "SIGN UP",
+            "has_account": "Already have an account?",
+            "login_link": "Login"
+        },
+        "dashboard": {
+            "title": "Map Discovery",
+            "status": "STATUS",
+            "loading": "Loading map...",
+            "selections": "SELECTIONS",
+            "product_unit": "Product",
+            "submit_request": "CONFIRM REQUEST",
+            "filter_active": "Active Only",
+            "filter_all": "Show All",
+            "active_restaurants": "restaurants with suspended food",
+            "guest_text": "There are",
+            "guest_suffix": "restaurants with available food in your area!"
+        },
+        "sidebar": {
+            "map": "Map Discovery",
+            "profile": "Profile Info",
+            "report": "Impact Report",
+            "logout": "LOGOUT",
+            "overview": "Overview",
+            "inventory": "Inventory",
+            "reports": "Reports"
+        },
+        "owner": {
+            "title": "Restaurant Management Panel",
+            "total_products": "TOTAL PRODUCTS",
+            "suspended": "SUSPENDED ITEMS",
+            "today_donations": "TODAY'S DONATIONS",
+            "critical_skt": "CRITICAL EXPIRY",
+            "pending_title": "Pending Deliveries (PIN Verification)",
+            "col_user": "USER",
+            "col_product": "PRODUCT",
+            "col_time": "MATCH TIME",
+            "col_pin": "PIN VERIFICATION",
+            "pin_placeholder": "6 Digit PIN",
+            "verify_btn": "VERIFY",
+            "no_pending": "No pending delivery matches at the moment.",
+            "inventory_title": "Product Inventory",
+            "add_product": "ADD NEW PRODUCT",
+            "badge_hero": "ZERO WASTE HERO"
+        },
+        "modal": {
+            "countdown": "MATCHING COUNTDOWN",
+            "queue": "QUEUE",
+            "queue_suffix": "People",
+            "menu_title": "SUSPENDED MENU",
+            "menu_limit": "MAX 3 ITEMS",
+            "matching_info": "When the timer expires, users with the highest Priority Score will be automatically matched using the Greedy Matching algorithm.",
+            "back": "GO BACK",
+            "save": "SAVE SELECTIONS",
+            "no_products": "No suspended products available at this restaurant.",
+            "special_price": "SPECIAL PRICE"
+        },
+        "profile": {
+            "title": "Profile Info",
+            "points": "POINTS",
+            "requests": "REQUESTS",
+            "pending_title": "Your Pending Deliveries",
+            "pin_label": "DELIVERY PIN CODE"
+        },
+        "messages": {
+            "welcome": "Welcome",
+            "login_error": "Invalid username or password!",
+            "register_success": "Registration successful! You can now login.",
+            "username_taken": "This username is already taken.",
+            "daily_limit": "You have reached the daily limit of 3 restaurant requests.",
+            "pin_verified": "PIN Verified! Delivery successful, +10 Trust Points awarded.",
+            "pin_wrong": "Wrong PIN code!",
+            "guest_warning": "You need to login to request food."
+        },
+        "decoration": {
+            "slogan": "Community solidarity<br>against food waste",
+            "stat_food": "Kg Food Saved",
+            "stat_users": "Happy Users"
+        }
+    }
+}
