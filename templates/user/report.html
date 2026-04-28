@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Etki Raporu{% endblock %}
+{% block title %}{{ t.report.title }}{% endblock %}
 {% block body_class %}dashboard-page user-theme{% endblock %}
 
 {% block body %}
@@ -24,20 +24,20 @@
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                 </svg>
-                <span>Harita Keşfi</span>
+                <span>{{ t.sidebar.map }}</span>
             </a>
             <a href="{{ url_for('user_profile') }}" class="nav-item" id="nav-profile">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span>Profil Bilgileri</span>
+                <span>{{ t.sidebar.profile }}</span>
             </a>
             <a href="{{ url_for('user_report') }}" class="nav-item active" id="nav-report">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 20V10M12 20V4M6 20v-6"/>
                 </svg>
-                <span>Etki Raporu</span>
+                <span>{{ t.sidebar.report }}</span>
             </a>
         </nav>
 
@@ -48,7 +48,7 @@
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>ÇIKIŞ</span>
+                <span>{{ t.sidebar.logout }}</span>
             </a>
         </div>
     </aside>
@@ -59,12 +59,12 @@
             <!-- Başlık -->
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">Toplumsal Etki</h1>
-                    <p class="page-subtitle">Verilerle iyiliği takip ediyoruz.</p>
+                    <h1 class="page-title">{{ t.report.title }}</h1>
+                    <p class="page-subtitle">{{ t.report.subtitle }}</p>
                 </div>
                 <div class="header-actions">
-                    <a href="{{ url_for('api_export_csv') }}" class="btn btn-outline">CSV İndir</a>
-                    <button class="btn btn-primary" onclick="window.print()">Paylaş</button>
+                    <a href="{{ url_for('api_export_csv') }}" class="btn btn-outline">{{ t.report.export_csv }}</a>
+                    <button class="btn btn-primary" onclick="window.print()">{{ t.report.share }}</button>
                 </div>
             </div>
 
@@ -79,7 +79,7 @@
                     </div>
                     <span class="stat-number text-green">{{ stats.food_saved_kg }}</span>
                     <span class="stat-unit">Kg</span>
-                    <span class="stat-desc">ÖNLENEN GIDA ATIĞI</span>
+                    <span class="stat-desc">{{ t.report.food_saved }}</span>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon orange-bg">
@@ -88,7 +88,7 @@
                         </svg>
                     </div>
                     <span class="stat-number text-orange">{{ stats.happy_users }}</span>
-                    <span class="stat-desc">MUTLU KULLANICI</span>
+                    <span class="stat-desc">{{ t.report.happy_users }}</span>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon blue-bg">
@@ -98,7 +98,7 @@
                     </div>
                     <span class="stat-number text-blue">{{ stats.co2_saved_kg }}</span>
                     <span class="stat-unit">Kg</span>
-                    <span class="stat-desc">CO2 TASARRUFU</span>
+                    <span class="stat-desc">{{ t.report.co2_saved }}</span>
                 </div>
             </div>
 
@@ -106,8 +106,8 @@
             <div class="chart-section">
                 <div class="chart-header">
                     <div>
-                        <h2 class="section-title">Topluluk Gelişimi</h2>
-                        <p class="section-subtitle">Son 7 günlük porsiyon paylaşım verileri</p>
+                        <h2 class="section-title">{{ t.report.community_growth }}</h2>
+                        <p class="section-subtitle">{{ t.report.weekly_stats }}</p>
                     </div>
                     {% set max_day = stats.daily_stats.values()|max if stats.daily_stats.values()|list else 0 %}
                     {% if max_day > 0 %}
@@ -117,7 +117,7 @@
                             <line x1="12" y1="16" x2="12" y2="12"/>
                             <line x1="12" y1="8" x2="12.01" y2="8"/>
                         </svg>
-                        En çok bağış yapılan gün:
+                        {{ t.report.top_day }}:
                         <strong class="text-accent">
                             {% set days_tr = {'Monday':'Pazartesi','Tuesday':'Salı','Wednesday':'Çarşamba','Thursday':'Perşembe','Friday':'Cuma','Saturday':'Cumartesi','Sunday':'Pazar'} %}
                             Cuma
@@ -132,7 +132,7 @@
                             <div class="bar-wrapper">
                                 <div class="bar" style="height: {{ (count / (max_day if max_day > 0 else 1)) * 100 }}%"></div>
                             </div>
-                            <span class="bar-label">GÜN {{ loop.index }}</span>
+                             <span class="bar-label">{{ t.report.day_label }} {{ loop.index }}</span>
                         </div>
                         {% endfor %}
                     </div>

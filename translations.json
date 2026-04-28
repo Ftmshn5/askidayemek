@@ -103,6 +103,19 @@
             "slogan": "Gıda israfına karşı<br>toplumsal dayanışma",
             "stat_food": "Kg Gıda Kurtarıldı",
             "stat_users": "Mutlu Kullanıcı"
+        },
+        "report": {
+            "title": "Toplumsal Etki",
+            "subtitle": "Verilerle iyiliği takip ediyoruz.",
+            "export_csv": "CSV İndir",
+            "share": "Paylaş",
+            "food_saved": "ÖNLENEN GIDA ATIĞI",
+            "happy_users": "MUTLU KULLANICI",
+            "co2_saved": "CO2 TASARRUFU",
+            "community_growth": "Topluluk Gelişimi",
+            "weekly_stats": "Son 7 günlük porsiyon paylaşım verileri",
+            "top_day": "En çok bağış yapılan gün",
+            "day_label": "GÜN"
         }
     },
     "en": {
@@ -209,6 +222,19 @@
             "slogan": "Community solidarity<br>against food waste",
             "stat_food": "Kg Food Saved",
             "stat_users": "Happy Users"
+        },
+        "report": {
+            "title": "Social Impact",
+            "subtitle": "Tracking goodness with data.",
+            "export_csv": "Download CSV",
+            "share": "Share",
+            "food_saved": "PREVENTED FOOD WASTE",
+            "happy_users": "HAPPY USERS",
+            "co2_saved": "CO2 SAVINGS",
+            "community_growth": "Community Growth",
+            "weekly_stats": "Last 7 days portion sharing data",
+            "top_day": "Most donations on",
+            "day_label": "DAY"
         }
     }
 }
