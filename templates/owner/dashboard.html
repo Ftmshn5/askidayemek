@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Restoran Yönetim Paneli{% endblock %}
+{% block title %}{{ t.owner.title }}{% endblock %}
 {% block body_class %}dashboard-page owner-theme{% endblock %}
 
 {% block body %}
@@ -26,27 +26,27 @@
                     <rect x="14" y="14" width="7" height="7"/>
                     <rect x="3" y="14" width="7" height="7"/>
                 </svg>
-                <span>Genel Bakış</span>
+                <span>{{ t.sidebar.overview }}</span>
             </a>
             <a href="{{ url_for('owner_dashboard') }}#envanter" class="nav-item" id="nav-inventory">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
                     <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
                 </svg>
-                <span>Envanter</span>
+                <span>{{ t.sidebar.inventory }}</span>
             </a>
             <a href="{{ url_for('owner_report') }}" class="nav-item" id="nav-reports">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 20V10M12 20V4M6 20v-6"/>
                 </svg>
-                <span>Raporlar</span>
+                <span>{{ t.sidebar.reports }}</span>
             </a>
             <a href="{{ url_for('owner_profile') }}" class="nav-item" id="nav-profile">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span>Profil</span>
+                <span>{{ t.sidebar.profile }}</span>
             </a>
         </nav>
 
@@ -57,7 +57,7 @@
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>OTURUMU KAPAT</span>
+                <span>{{ t.sidebar.logout }}</span>
             </a>
         </div>
     </aside>
@@ -68,7 +68,7 @@
             <!-- Başlık -->
             <div class="page-header">
                 <div>
-                    <h1 class="page-title">Restoran Yönetim Paneli</h1>
+                    <h1 class="page-title">{{ t.owner.title }}</h1>
                     {% if restaurant %}
                     <p class="page-subtitle" style="display:flex; align-items:center; gap:10px;">
                         {{ restaurant.name | upper }} — ŞUBE #01
@@ -101,7 +101,7 @@
                             <rect x="3" y="14" width="7" height="7"/>
                         </svg>
                     </div>
-                    <span class="stat-label-sm">TOPLAM ÜRÜN</span>
+                    <span class="stat-label-sm">{{ t.owner.total_products }}</span>
                     <span class="stat-number-sm">{{ stats.total_products }}</span>
                 </div>
                 <div class="stat-card mini">
@@ -110,7 +110,7 @@
                             <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
                         </svg>
                     </div>
-                    <span class="stat-label-sm">ASKIDA OLANLAR</span>
+                    <span class="stat-label-sm">{{ t.owner.suspended }}</span>
                     <span class="stat-number-sm">{{ stats.suspended_count }}</span>
                 </div>
                 <div class="stat-card mini">
@@ -121,7 +121,7 @@
                             <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
                         </svg>
                     </div>
-                    <span class="stat-label-sm">BUGÜNKÜ BAĞIŞ</span>
+                    <span class="stat-label-sm">{{ t.owner.today_donations }}</span>
                     <span class="stat-number-sm">{{ stats.today_donations }}</span>
                 </div>
                 <div class="stat-card mini">
@@ -132,24 +132,24 @@
                             <line x1="12" y1="17" x2="12.01" y2="17"/>
                         </svg>
                     </div>
-                    <span class="stat-label-sm">KRİTİK SKT</span>
+                    <span class="stat-label-sm">{{ t.owner.critical_skt }}</span>
                     <span class="stat-number-sm">{{ stats.critical_skt }}</span>
                 </div>
             </div>
 
             <!-- Teslimat Bekleyen Talepler -->
-            <div class="section-header" style="margin-top: 40px;">
-                <h2 class="section-title">Teslimat Bekleyenler (PIN Onayı)</h2>
+            <div class="inventory-section">
+                <h2 class="section-title">{{ t.owner.pending_title }}</h2>
             </div>
             
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>KULLANICI</th>
-                            <th>ÜRÜN</th>
-                            <th>EŞLEŞME ZAMANI</th>
-                            <th>PIN DOĞRULAMA</th>
+                            <th>{{ t.owner.col_user }}</th>
+                            <th>{{ t.owner.col_product }}</th>
+                            <th>{{ t.owner.col_time }}</th>
+                            <th>{{ t.owner.col_pin }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -170,14 +170,14 @@
                             <td>
                                 <form method="POST" action="{{ url_for('owner_verify_pin') }}" style="display:flex; gap:10px;">
                                     <input type="hidden" name="transaction_id" value="{{ pt.id }}">
-                                    <input type="text" name="pin_code" placeholder="6 Haneli PIN" maxlength="6" style="padding:10px; border:2px solid #E5E7EB; border-radius:8px; width:120px; text-align:center; font-weight:bold; letter-spacing:2px;" required>
-                                    <button type="submit" class="btn btn-primary" style="padding:10px 15px; border-radius:8px; font-size:0.85rem;">ONAYLA</button>
+                                    <input type="text" name="pin_code" placeholder="{{ t.owner.pin_placeholder }}" maxlength="6" style="padding:10px; border:2px solid #E5E7EB; border-radius:8px; width:120px; text-align:center; font-weight:bold; letter-spacing:2px;" required>
+                                    <button type="submit" class="btn btn-primary" style="padding:10px 15px; border-radius:8px; font-size:0.85rem;">{{ t.owner.verify_btn }}</button>
                                 </form>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4" style="text-align:center; padding:30px; color:#6B7280; font-weight:500;">Şu anda teslimat bekleyen eşleşme bulunmuyor.</td>
+                            <td colspan="4" style="text-align:center; padding:30px; color:#6B7280; font-weight:500;">{{ t.owner.no_pending }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -185,15 +185,17 @@
             </div>
 
             <!-- Envanter Tablosu -->
-            <div class="section-header" id="envanter" style="margin-top: 40px;">
-                <h2 class="section-title">Ürün Envanteri</h2>
-                <button class="btn btn-primary" onclick="document.getElementById('add-product-modal').style.display='flex'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="12" y1="5" x2="12" y2="19"/>
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                    YENİ ÜRÜN EKLE
-                </button>
+            <div class="inventory-section" id="envanter" style="margin-top: 40px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 class="section-title" style="margin:0;">{{ t.owner.inventory_title }}</h2>
+                    <button class="btn btn-primary" onclick="document.getElementById('add-product-modal').style.display='flex'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        {{ t.owner.add_product }}
+                    </button>
+                </div>
             </div>
 
             <div class="table-wrapper">
