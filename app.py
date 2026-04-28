@@ -10,6 +10,7 @@ localhost:5000 adresinde web browser'da çalışır.
 
 import io
 import csv
+import json
 from datetime import datetime, timezone, timedelta
 
 from flask import (
@@ -57,6 +58,35 @@ def load_user(user_id):
 
 
 # ============================================
+# ÇOKLU DİL DESTEĞİ (i18n)
+# ============================================
+
+with open('translations.json', 'r', encoding='utf-8') as f:
+    TRANSLATIONS = json.load(f)
+
+def get_lang():
+    """Kullanıcının seçtiği dili döndürür."""
+    return session.get('lang', 'tr')
+
+def get_translations():
+    """Aktif dilin çeviri sözlüğünü döndürür."""
+    lang = get_lang()
+    return TRANSLATIONS.get(lang, TRANSLATIONS['tr'])
+
+@app.context_processor
+def inject_translations():
+    """Tüm template'lere otomatik olarak `t` ve `lang` değişkeni gönderir."""
+    return {'t': get_translations(), 'lang': get_lang()}
+
+@app.route('/set_lang/<lang_code>')
+def set_lang(lang_code):
+    """Dil değiştirme."""
+    if lang_code in ['tr', 'en']:
+        session['lang'] = lang_code
+    return redirect(request.referrer or url_for('index'))
+
+
+# ============================================
 # ANA ROUTE'LAR
 # ============================================
 
@@ -72,37 +102,73 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    Giriş ekranı.
-    Wireframe: Auth Screen - Rol seçimli (Restoran/İhtiyaç Sahibi)
-    """
+    """Giriş sayfası."""
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('owner_dashboard') if current_user.role == 'owner' else url_for('user_dashboard'))
 
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '')
-        role = request.form.get('role', 'user')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        role = request.form.get('role')
 
         user = User.query.filter_by(username=username, role=role).first()
-
         if user and user.check_password(password):
             login_user(user)
-
-            # Otomatik SKT kontrolü (her girişte çalışır)
-            auto_suspend_expiring_products()
-
-            # Batch matching kontrolü
-            run_batch_matching()
-
-            if user.role == 'owner':
-                return redirect(url_for('owner_dashboard'))
-            return redirect(url_for('user_dashboard'))
+            flash(f'Hoş geldiniz, {user.full_name}!', 'success')
+            return redirect(url_for('owner_dashboard') if role == 'owner' else url_for('user_dashboard'))
         else:
             flash('Kullanıcı adı veya şifre hatalı!', 'error')
 
     return render_template('login.html')
 
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Kayıt sayfası."""
+    if current_user.is_authenticated:
+        return redirect(url_for('owner_dashboard') if current_user.role == 'owner' else url_for('user_dashboard'))
+
+    if request.method == 'POST':
+        full_name = request.form.get('full_name')
+        username = request.form.get('username')
+        password = request.form.get('password')
+        role = request.form.get('role')
+        restaurant_name = request.form.get('restaurant_name')
+
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash('Bu kullanıcı adı zaten alınmış.', 'error')
+            return redirect(url_for('register'))
+
+        new_user = User(
+            username=username,
+            full_name=full_name,
+            role=role,
+            user_type='standard'
+        )
+        new_user.set_password(password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        if role == 'owner' and restaurant_name:
+            # Rastgele koordinatlarla restoran oluştur (Elazığ merkez)
+            import random
+            lat = 38.6748 + random.uniform(-0.02, 0.02)
+            lon = 39.1920 + random.uniform(-0.02, 0.02)
+            new_restaurant = Restaurant(
+                owner_id=new_user.id,
+                name=restaurant_name,
+                latitude=lat,
+                longitude=lon,
+                address='Elazığ Merkez'
+            )
+            db.session.add(new_restaurant)
+            db.session.commit()
+
+        flash('Kayıt başarılı! Şimdi giriş yapabilirsiniz.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('register.html')
 
 @app.route('/logout')
 @login_required
@@ -111,6 +177,15 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+
+@app.route('/guest/dashboard')
+def guest_dashboard():
+    """
+    Misafir Kullanıcı Dashboard (Sadece Görüntüleme).
+    """
+    # Otomatik SKT kontrolü
+    auto_suspend_expiring_products()
+    return render_template('user/dashboard.html', is_guest=True)
 
 # ============================================
 # KULLANICI (İHTİYAÇ SAHİBİ) ROUTE'LARI
@@ -126,9 +201,6 @@ def user_dashboard():
     if current_user.role != 'user':
         return redirect(url_for('owner_dashboard'))
 
-    # Otomatik SKT kontrolü
-    auto_suspend_expiring_products()
-
     return render_template('user/dashboard.html')
 
 
@@ -143,8 +215,18 @@ def user_profile():
         return redirect(url_for('owner_dashboard'))
 
     total_requests = Transaction.query.filter_by(user_id=current_user.id).count()
+    
+    # Teslim Alınmayı Bekleyen (PIN ile) Talepler
+    active_transactions = Transaction.query.filter_by(
+        user_id=current_user.id,
+        status='matched'
+    ).order_by(Transaction.matched_at.desc()).all()
 
-    return render_template('user/profile.html', total_requests=total_requests)
+    return render_template(
+        'user/profile.html', 
+        total_requests=total_requests,
+        active_transactions=active_transactions
+    )
 
 
 @app.route('/user/report')
@@ -175,9 +257,6 @@ def owner_dashboard():
     """
     if current_user.role != 'owner':
         return redirect(url_for('user_dashboard'))
-
-    # Otomatik SKT kontrolü
-    auto_suspend_expiring_products()
 
     restaurant = Restaurant.query.filter_by(owner_id=current_user.id).first()
 
@@ -211,11 +290,18 @@ def owner_dashboard():
         'critical_skt': critical_skt
     }
 
+    # Teslimat Bekleyen Talepler
+    pending_transactions = Transaction.query.filter(
+        Transaction.restaurant_id == restaurant.id,
+        Transaction.status == 'matched'
+    ).order_by(Transaction.matched_at.desc()).all()
+
     return render_template(
         'owner/dashboard.html',
         restaurant=restaurant,
         products=products,
-        stats=stats
+        stats=stats,
+        pending_transactions=pending_transactions
     )
 
 
@@ -294,20 +380,63 @@ def owner_toggle_product(product_id):
     return redirect(url_for('owner_dashboard'))
 
 
-@app.route('/owner/product/delete/<int:product_id>', methods=['POST'])
+@app.route('/owner/delete_product/<int:product_id>', methods=['POST'])
 @login_required
 def owner_delete_product(product_id):
-    """Ürün silme."""
-    product = Product.query.get_or_404(product_id)
+    """Ürün sil."""
+    if current_user.role != 'owner':
+        return redirect(url_for('user_dashboard'))
 
-    restaurant = Restaurant.query.filter_by(owner_id=current_user.id).first()
-    if not restaurant or product.restaurant_id != restaurant.id:
-        flash('Bu ürünü silme yetkiniz yok!', 'error')
+    product = Product.query.get_or_404(product_id)
+    if product.restaurant.owner_id != current_user.id:
+        flash('Yetkisiz işlem.', 'error')
         return redirect(url_for('owner_dashboard'))
 
     db.session.delete(product)
     db.session.commit()
-    flash(f'"{product.name}" silindi.', 'info')
+    flash('Ürün silindi.', 'success')
+    return redirect(url_for('owner_dashboard'))
+
+
+@app.route('/owner/verify_pin', methods=['POST'])
+@login_required
+def owner_verify_pin():
+    """Teslimat için PIN kodu doğrula."""
+    if current_user.role != 'owner':
+        return redirect(url_for('user_dashboard'))
+
+    pin_code = request.form.get('pin_code')
+    transaction_id = request.form.get('transaction_id')
+    
+    if not pin_code or not transaction_id:
+        flash('Geçersiz istek.', 'error')
+        return redirect(url_for('owner_dashboard'))
+        
+    transaction = Transaction.query.get_or_404(transaction_id)
+    
+    if transaction.restaurant.owner_id != current_user.id:
+        flash('Yetkisiz işlem.', 'error')
+        return redirect(url_for('owner_dashboard'))
+        
+    if transaction.status != 'matched':
+        flash('Bu işlem teslimat bekleyen durumunda değil.', 'error')
+        return redirect(url_for('owner_dashboard'))
+        
+    if transaction.pin_code != pin_code:
+        flash('Hatalı PIN kodu!', 'error')
+        return redirect(url_for('owner_dashboard'))
+        
+    # Başarılı Teslimat
+    transaction.status = 'completed'
+    transaction.completed_at = datetime.now(timezone.utc)
+    transaction.product.status = 'completed'
+    
+    # Kullanıcıya güven puanı ver
+    if transaction.user:
+        transaction.user.points += 10
+        
+    db.session.commit()
+    flash('PIN Doğrulandı! Teslimat başarılı, kullanıcıya +10 Güven Puanı eklendi.', 'success')
     return redirect(url_for('owner_dashboard'))
 
 
@@ -359,7 +488,6 @@ def owner_profile():
 # ============================================
 
 @app.route('/api/restaurants')
-@login_required
 def api_restaurants():
     """
     Harita için restoran verilerini JSON olarak döndür.
@@ -387,7 +515,6 @@ def api_restaurants():
 
 
 @app.route('/api/products/<int:restaurant_id>')
-@login_required
 def api_products(restaurant_id):
     """
     Belirli bir restoranın askıdaki ürünlerini döndür.
@@ -447,9 +574,21 @@ def api_create_request():
         return jsonify({'error': 'En az bir ürün seçmelisiniz'}), 400
 
     if len(product_ids) > 3:
-        return jsonify({'error': 'En fazla 3 ürün seçebilirsiniz'}), 400
-
+        return jsonify({'error': 'Tek seferde en fazla 3 ürün seçebilirsiniz'}), 400
+        
     now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    # Günlük 3 İstek Limiti (Anti-Spam)
+    daily_requests = Transaction.query.filter(
+        Transaction.user_id == current_user.id,
+        Transaction.created_at >= today_start
+    ).count()
+    
+    if daily_requests >= 3:
+        return jsonify({'error': 'Günlük maksimum 3 restoran talep limitine ulaştınız.'}), 400
+
+
     created_transactions = []
 
     for pid in product_ids:
@@ -488,14 +627,11 @@ def api_create_request():
 
     db.session.commit()
 
-    # Batch matching çalıştır
-    matched = run_batch_matching()
-
     return jsonify({
         'success': True,
         'message': f'{len(created_transactions)} ürün için talep oluşturuldu.',
         'transactions': created_transactions,
-        'matched_count': len(matched)
+        'matched_count': 0
     })
 
 
@@ -552,8 +688,26 @@ def api_export_csv():
 
 
 # ============================================
-# UYGULAMA BAŞLATMA
+# UYGULAMA BAŞLATMA VE SCHEDULER
 # ============================================
+
+from apscheduler.schedulers.background import BackgroundScheduler
+import os
+
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    # Uygulama context'ine ihtiyaç duyulduğu için, app objesini içine pass eden sarmalayıcılar
+    def suspend_job():
+        with app.app_context():
+            auto_suspend_expiring_products()
+            
+    def match_job():
+        with app.app_context():
+            run_batch_matching()
+            
+    scheduler.add_job(func=suspend_job, trigger="interval", minutes=5, id="check_skt")
+    scheduler.add_job(func=match_job, trigger="interval", minutes=1, id="greedy_match")
+    scheduler.start()
 
 with app.app_context():
     db.create_all()
@@ -569,5 +723,9 @@ if __name__ == '__main__':
     print("  👨‍🍳 Restoran:  lezzet_sofrasi / 123456")
     print("  👤 Kullanıcı: ahmet_yilmaz / 123456")
     print("=" * 50 + "\n")
+
+    # Prevent running scheduler twice in debug mode
+    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
+        start_scheduler()
 
     app.run(debug=True, host='0.0.0.0', port=5000)

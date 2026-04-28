@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Harita Keşfi{% endblock %}
+{% block title %}{{ t.dashboard.title }}{% endblock %}
 {% block body_class %}dashboard-page user-theme{% endblock %}
 
 {% block body %}
@@ -14,7 +14,7 @@
                         <path d="M18 10C18 10 12 15 12 20C12 23.314 14.686 26 18 26C21.314 26 24 23.314 24 20C24 15 18 10 18 10Z" fill="white" fill-opacity="0.9"/>
                     </svg>
                 </div>
-                <span class="logo-text"><strong>FOOD</strong> BRIDGE</span>
+                <span class="logo-text"><strong>ASKIDA</strong> YEMEK</span>
             </div>
         </div>
 
@@ -24,20 +24,20 @@
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                 </svg>
-                <span>Harita Keşfi</span>
+                <span>{{ t.sidebar.map }}</span>
             </a>
             <a href="{{ url_for('user_profile') }}" class="nav-item" id="nav-profile">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span>Profil Bilgileri</span>
+                <span>{{ t.sidebar.profile }}</span>
             </a>
             <a href="{{ url_for('user_report') }}" class="nav-item" id="nav-report">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 20V10M12 20V4M6 20v-6"/>
                 </svg>
-                <span>Etki Raporu</span>
+                <span>{{ t.sidebar.report }}</span>
             </a>
         </nav>
 
@@ -48,15 +48,42 @@
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>ÇIKIŞ</span>
+                <span>{{ t.sidebar.logout }}</span>
             </a>
         </div>
     </aside>
 
     <!-- Ana İçerik -->
-    <main class="main-content">
+    <main class="main-content" style="position: relative;">
+        {% if is_guest %}
+        <!-- Misafir Modu Blurlu Overlay -->
+        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 2000; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 20px;">
+            <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center; max-width: 450px; border: 1px solid #eaeaea;">
+                <div style="width: 72px; height: 72px; background: #f3f7f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#7C9A6E" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                </div>
+                <h3 id="guest-overlay-text" style="font-size: 24px; font-weight: 700; color: #2c3e50; margin-bottom: 15px; font-family: inherit;">Harita taranıyor...</h3>
+                <p style="color: #64748b; margin-bottom: 30px; font-size: 15px; line-height: 1.6;">Harita detaylarını görmek, konumunuza en yakın restoranları incelemek ve hemen ücretsiz yemek talep etmek için giriş yapmalısınız.</p>
+                <a href="{{ url_for('login') }}" class="btn btn-primary" style="display: block; width: 100%; padding: 16px; font-size: 16px; font-weight: bold; text-decoration: none; border-radius: 8px; text-align: center;">Giriş Yap / Kayıt Ol</a>
+            </div>
+        </div>
+        {% endif %}
+        
         <!-- Harita -->
-        <div class="map-container" id="map"></div>
+        <div style="position: relative; flex: 1; display: flex; flex-direction: column;">
+            <div class="map-container" id="map" style="flex: 1; min-height: 400px;"></div>
+            
+            <!-- Harita Filtre Butonu -->
+            <button id="map-filter-btn" onclick="toggleMapFilter()" style="position: absolute; top: 15px; right: 15px; z-index: 1000; background: white; border: 2px solid #E5E7EB; border-radius: 12px; padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; font-size: 13px; font-weight: 700; color: #374151; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                <span id="filter-btn-text">Sadece Aktifler</span>
+            </button>
+        </div>
 
         <!-- Alt Durum Çubuğu -->
         <div class="map-status-bar" id="status-bar">
@@ -66,8 +93,8 @@
                     <circle cx="12" cy="10" r="3"/>
                 </svg>
                 <div>
-                    <span class="status-label">DURUM</span>
-                    <span class="status-value" id="status-text">Harita yükleniyor...</span>
+                    <span class="status-label">{{ t.dashboard.status }}</span>
+                    <span class="status-value" id="status-text">{{ t.dashboard.loading }}</span>
                 </div>
             </div>
             <div class="status-info">
@@ -78,12 +105,12 @@
                     <line x1="3" y1="10" x2="21" y2="10"/>
                 </svg>
                 <div>
-                    <span class="status-label">SEÇİMLER</span>
-                    <span class="status-value" id="selection-count">0 / 3 Ürün</span>
+                    <span class="status-label">{{ t.dashboard.selections }}</span>
+                    <span class="status-value" id="selection-count">0 / 3 {{ t.dashboard.product_unit }}</span>
                 </div>
             </div>
             <button class="btn btn-primary" id="submit-request-btn" onclick="submitRequest()" disabled>
-                TALEBİ ONAYLA
+                {{ t.dashboard.submit_request }}
             </button>
         </div>
     </main>
@@ -122,28 +149,28 @@
                     <polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <div>
-                    <span class="countdown-label">EŞLEŞME GERİ SAYIMI</span>
+                    <span class="countdown-label">{{ t.modal.countdown }}</span>
                     <span class="countdown-time" id="countdown-time">14:51</span>
                 </div>
             </div>
             <div class="countdown-right">
-                <span class="queue-label">KUYRUK</span>
+                <span class="queue-label">{{ t.modal.queue }}</span>
                 <span class="queue-count" id="queue-count">0</span>
-                <span class="queue-suffix">Kişi</span>
+                <span class="queue-suffix">{{ t.modal.queue_suffix }}</span>
             </div>
         </div>
 
         <!-- Ürün Listesi -->
         <div class="modal-body">
             <div class="menu-header">
-                <h3 class="menu-title">ASKIDAKİ MENÜ</h3>
+                <h3 class="menu-title">{{ t.modal.menu_title }}</h3>
                 <span class="menu-limit">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="16" x2="12" y2="12"/>
                         <line x1="12" y1="8" x2="12.01" y2="8"/>
                     </svg>
-                    MAX 3 ÜRÜN
+                    {{ t.modal.menu_limit }}
                 </span>
             </div>
             <div class="product-list" id="product-list">
@@ -153,8 +180,7 @@
 
         <!-- Greedy Matching açıklaması -->
         <div class="matching-info">
-            <p>"Süre sonunda, talep yapan kullanıcılar arasından en yüksek <em>Öncelik Puanına</em> sahip olanlar
-            <em>Greedy Matching</em> algoritmasıyla otomatik olarak eşleştirilecektir."</p>
+            <p>"{{ t.modal.matching_info }}"</p>
         </div>
 
         <!-- Modal Footer -->
@@ -164,10 +190,10 @@
                     <line x1="19" y1="12" x2="5" y2="12"/>
                     <polyline points="12 19 5 12 12 5"/>
                 </svg>
-                GERİ DÖN
+                {{ t.modal.back }}
             </button>
             <button class="btn btn-primary btn-lg" id="modal-save-btn" onclick="saveSelections()" disabled>
-                SEÇİMLERİ KAYDET
+                {{ t.modal.save }}
             </button>
         </div>
     </div>
@@ -178,20 +204,52 @@
 // Seçili ürünler
 let selectedProducts = [];
 let countdownInterval = null;
+const isGuest = {{ 'true' if is_guest else 'false' }};
+
+// Harita filtresi için global değişkenler
+let allMarkers = [];
+let mapInstance = null;
+let showOnlyActive = false;
 
 // Harita başlatma
 document.addEventListener('DOMContentLoaded', function() {
     initMap();
 });
 
+function toggleMapFilter() {
+    showOnlyActive = !showOnlyActive;
+    const btnText = document.getElementById('filter-btn-text');
+    const btn = document.getElementById('map-filter-btn');
+    
+    if (showOnlyActive) {
+        btnText.textContent = 'Tümünü Göster';
+        btn.style.background = '#E67E22';
+        btn.style.color = 'white';
+        btn.style.borderColor = '#E67E22';
+    } else {
+        btnText.textContent = 'Sadece Aktifler';
+        btn.style.background = 'white';
+        btn.style.color = '#374151';
+        btn.style.borderColor = '#E5E7EB';
+    }
+    
+    allMarkers.forEach(item => {
+        if (showOnlyActive && !item.hasSuspended) {
+            mapInstance.removeLayer(item.marker);
+        } else {
+            item.marker.addTo(mapInstance);
+        }
+    });
+}
+
 function initMap() {
     // Elazığ / Fırat Üniversitesi merkezi
-    const map = L.map('map').setView([38.6748, 39.1920], 15);
+    mapInstance = L.map('map').setView([38.6748, 39.1920], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19
-    }).addTo(map);
+    }).addTo(mapInstance);
 
     // Restoranları yükle
     fetch('/api/restaurants')
@@ -216,14 +274,24 @@ function initMap() {
                     iconAnchor: [16, 42]
                 });
 
-                const marker = L.marker([r.lat, r.lon], { icon: icon }).addTo(map);
+                const marker = L.marker([r.lat, r.lon], { icon: icon }).addTo(mapInstance);
                 marker.on('click', () => openRestaurantModal(r.id));
+                
+                // Marker'ı global listeye kaydet
+                allMarkers.push({ marker: marker, hasSuspended: r.has_suspended });
 
                 if (r.has_suspended) activeCount++;
             });
 
             document.getElementById('status-text').textContent =
                 `${activeCount} restoranda askıda ürün mevcut`;
+                
+            if (isGuest) {
+                const overlayText = document.getElementById('guest-overlay-text');
+                if (overlayText) {
+                    overlayText.innerHTML = `Şu an bölgenizde askıda yemeği olan <span style="color: #7C9A6E;">${activeCount}</span> restoran var!`;
+                }
+            }
         });
 }
 
@@ -328,6 +396,12 @@ function saveSelections() {
 }
 
 function submitRequest() {
+    if (isGuest) {
+        showNotification('Yemek talep edebilmek için giriş yapmalısınız.', 'error');
+        setTimeout(() => { window.location.href = "{{ url_for('login') }}"; }, 2000);
+        return;
+    }
+
     if (selectedProducts.length === 0) return;
 
     fetch('/api/request', {

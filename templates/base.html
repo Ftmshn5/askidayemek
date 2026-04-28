@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Askıda Yemek - Gıda israfını önleyen, ihtiyaç sahiplerini restoranlarla buluşturan platform">
-    <title>{% block title %}Food Bridge{% endblock %} | Askıda Yemek</title>
+    <title>{% block title %}Askıda Yemek{% endblock %} | Askıda Yemek</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,6 +35,12 @@
     {% endwith %}
 
     {% block body %}{% endblock %}
+
+    <!-- Dil Değiştirme Butonu -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; gap: 5px; background: white; padding: 5px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+        <a href="{{ url_for('set_lang', lang_code='tr') }}" style="padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; {% if lang == 'tr' %}background: #7C9A6E; color: white;{% else %}background: #f3f4f6; color: #374151;{% endif %}">TR</a>
+        <a href="{{ url_for('set_lang', lang_code='en') }}" style="padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700; {% if lang == 'en' %}background: #7C9A6E; color: white;{% else %}background: #f3f4f6; color: #374151;{% endif %}">EN</a>
+    </div>
 
     <!-- Leaflet JS (Harita) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

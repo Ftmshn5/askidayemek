@@ -14,7 +14,7 @@
                         <path d="M18 10C18 10 12 15 12 20C12 23.314 14.686 26 18 26C21.314 26 24 23.314 24 20C24 15 18 10 18 10Z" fill="white" fill-opacity="0.9"/>
                     </svg>
                 </div>
-                <span class="logo-text"><strong>FOOD</strong> <span class="text-accent">BRIDGE</span></span>
+                <span class="logo-text"><strong>ASKIDA</strong> <span class="text-accent">YEMEK</span></span>
             </div>
         </div>
 
@@ -70,7 +70,15 @@
                 <div>
                     <h1 class="page-title">Restoran Yönetim Paneli</h1>
                     {% if restaurant %}
-                    <p class="page-subtitle">{{ restaurant.name | upper }} — ŞUBE #01</p>
+                    <p class="page-subtitle" style="display:flex; align-items:center; gap:10px;">
+                        {{ restaurant.name | upper }} — ŞUBE #01
+                        {% if stats.today_donations >= 5 %}
+                        <span style="background:linear-gradient(135deg, #FFD700, #F39C12); color:white; padding:4px 10px; border-radius:12px; font-size:10px; font-weight:bold; letter-spacing:1px; display:inline-flex; align-items:center; gap:4px; box-shadow:0 2px 5px rgba(243,156,18,0.3);">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            SIFIR ATIK KAHRAMANI
+                        </span>
+                        {% endif %}
+                    </p>
                     {% endif %}
                 </div>
                 <div class="header-user-icon">
@@ -129,8 +137,55 @@
                 </div>
             </div>
 
+            <!-- Teslimat Bekleyen Talepler -->
+            <div class="section-header" style="margin-top: 40px;">
+                <h2 class="section-title">Teslimat Bekleyenler (PIN Onayı)</h2>
+            </div>
+            
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>KULLANICI</th>
+                            <th>ÜRÜN</th>
+                            <th>EŞLEŞME ZAMANI</th>
+                            <th>PIN DOĞRULAMA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pt in pending_transactions %}
+                        <tr>
+                            <td>
+                                <strong>{{ pt.user.full_name }}</strong>
+                                <span style="display:block; font-size:0.75rem; color:#6B7280; margin-top:4px;">{{ pt.user.username }}</span>
+                            </td>
+                            <td>
+                                <span class="quantity-badge" style="background:#E67E22; color:white;">{{ pt.product.name }}</span>
+                            </td>
+                            <td>
+                                <span class="date-cell">
+                                    {{ pt.matched_at.strftime('%H:%M') }}
+                                </span>
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('owner_verify_pin') }}" style="display:flex; gap:10px;">
+                                    <input type="hidden" name="transaction_id" value="{{ pt.id }}">
+                                    <input type="text" name="pin_code" placeholder="6 Haneli PIN" maxlength="6" style="padding:10px; border:2px solid #E5E7EB; border-radius:8px; width:120px; text-align:center; font-weight:bold; letter-spacing:2px;" required>
+                                    <button type="submit" class="btn btn-primary" style="padding:10px 15px; border-radius:8px; font-size:0.85rem;">ONAYLA</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding:30px; color:#6B7280; font-weight:500;">Şu anda teslimat bekleyen eşleşme bulunmuyor.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
             <!-- Envanter Tablosu -->
-            <div class="section-header" id="envanter">
+            <div class="section-header" id="envanter" style="margin-top: 40px;">
                 <h2 class="section-title">Ürün Envanteri</h2>
                 <button class="btn btn-primary" onclick="document.getElementById('add-product-modal').style.display='flex'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">

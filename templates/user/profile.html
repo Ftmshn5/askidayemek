@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Profil Bilgileri{% endblock %}
+{% block title %}{{ t.profile.title }}{% endblock %}
 {% block body_class %}dashboard-page user-theme{% endblock %}
 
 {% block body %}
@@ -14,7 +14,7 @@
                         <path d="M18 10C18 10 12 15 12 20C12 23.314 14.686 26 18 26C21.314 26 24 23.314 24 20C24 15 18 10 18 10Z" fill="white" fill-opacity="0.9"/>
                     </svg>
                 </div>
-                <span class="logo-text"><strong>FOOD</strong> BRIDGE</span>
+                <span class="logo-text"><strong>ASKIDA</strong> YEMEK</span>
             </div>
         </div>
 
@@ -24,20 +24,20 @@
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                 </svg>
-                <span>Harita Keşfi</span>
+                <span>{{ t.sidebar.map }}</span>
             </a>
             <a href="{{ url_for('user_profile') }}" class="nav-item active" id="nav-profile">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span>Profil Bilgileri</span>
+                <span>{{ t.sidebar.profile }}</span>
             </a>
             <a href="{{ url_for('user_report') }}" class="nav-item" id="nav-report">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 20V10M12 20V4M6 20v-6"/>
                 </svg>
-                <span>Etki Raporu</span>
+                <span>{{ t.sidebar.report }}</span>
             </a>
         </nav>
 
@@ -48,7 +48,7 @@
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>ÇIKIŞ</span>
+                <span>{{ t.sidebar.logout }}</span>
             </a>
         </div>
     </aside>
@@ -74,16 +74,40 @@
 
                 <div class="profile-stats">
                     <div class="profile-stat">
-                        <span class="stat-label">PUAN</span>
+                        <span class="stat-label">{{ t.profile.points }}</span>
                         <span class="stat-value text-primary">{{ current_user.points }}</span>
                     </div>
                     <div class="profile-divider"></div>
                     <div class="profile-stat">
-                        <span class="stat-label">TALEPLER</span>
+                        <span class="stat-label">{{ t.profile.requests }}</span>
                         <span class="stat-value text-accent">{{ total_requests }}</span>
                     </div>
                 </div>
             </div>
+            
+            {% if active_transactions %}
+            <div style="margin-top: 40px;">
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #1F2937; margin-bottom: 20px;">{{ t.profile.pending_title }}</h3>
+                <div style="display: grid; gap: 15px;">
+                    {% for tx in active_transactions %}
+                    <div style="background: white; border: 2px solid #E5E7EB; border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                        <div>
+                            <h4 style="margin: 0 0 5px 0; font-size: 1.1rem; color: #1F2937;">{{ tx.product.name }}</h4>
+                            <span style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                {{ tx.restaurant.name }}
+                            </span>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="display: block; font-size: 0.75rem; font-weight: 800; color: #6B7280; margin-bottom: 4px;">{{ t.profile.pin_label }}</span>
+                            <span style="background: #E67E22; color: white; padding: 8px 16px; border-radius: 8px; font-size: 1.25rem; font-weight: 900; letter-spacing: 2px;">{{ tx.pin_code }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
         </div>
     </main>
 </div>

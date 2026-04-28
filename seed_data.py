@@ -248,6 +248,22 @@ def seed_database():
         sample_transactions.append(t)
 
     db.session.add_all(sample_transactions)
+    db.session.flush()
+
+    # ============================================
+    # ÖRNEK PIN'Lİ EŞLEŞME (ahmet_yilmaz için)
+    # ============================================
+    pin_transaction = Transaction(
+        user_id=user1.id,
+        product_id=products[0].id,  # Mercimek Çorbası
+        restaurant_id=restaurant1.id,
+        priority_score=92.0,
+        status='matched',
+        pin_code='482516',
+        created_at=now - timedelta(minutes=30),
+        matched_at=now - timedelta(minutes=15)
+    )
+    db.session.add(pin_transaction)
     db.session.commit()
 
     print("✅ Demo veriler başarıyla eklendi!")
