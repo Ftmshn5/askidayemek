@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Profil{% endblock %}
+{% block title %}{{ t.sidebar.profile }}{% endblock %}
 {% block body_class %}dashboard-page owner-theme{% endblock %}
 
 {% block body %}
@@ -26,27 +26,27 @@
                     <rect x="14" y="14" width="7" height="7"/>
                     <rect x="3" y="14" width="7" height="7"/>
                 </svg>
-                <span>Genel Bakış</span>
+                <span>{{ t.sidebar.overview }}</span>
             </a>
             <a href="{{ url_for('owner_dashboard') }}#envanter" class="nav-item" id="nav-inventory">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
                     <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
                 </svg>
-                <span>Envanter</span>
+                <span>{{ t.sidebar.inventory }}</span>
             </a>
             <a href="{{ url_for('owner_report') }}" class="nav-item" id="nav-reports">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M18 20V10M12 20V4M6 20v-6"/>
                 </svg>
-                <span>Raporlar</span>
+                <span>{{ t.sidebar.reports }}</span>
             </a>
             <a href="{{ url_for('owner_profile') }}" class="nav-item active" id="nav-profile">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
                 </svg>
-                <span>Profil</span>
+                <span>{{ t.sidebar.profile }}</span>
             </a>
         </nav>
 
@@ -57,7 +57,7 @@
                     <polyline points="16 17 21 12 16 7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                <span>OTURUMU KAPAT</span>
+                <span>{{ t.sidebar.logout }}</span>
             </a>
         </div>
     </aside>
@@ -91,12 +91,12 @@
 
                 <div class="profile-stats">
                     <div class="profile-stat">
-                        <span class="stat-label">PUAN</span>
+                        <span class="stat-label">{{ t.profile.points }}</span>
                         <span class="stat-value text-primary">{{ current_user.points }}</span>
                     </div>
                     <div class="profile-divider"></div>
                     <div class="profile-stat">
-                        <span class="stat-label">BAĞIŞLAR</span>
+                        <span class="stat-label">{{ t.owner.today_donations }}</span>
                         <span class="stat-value text-accent">{{ total_donations }}</span>
                     </div>
                 </div>
