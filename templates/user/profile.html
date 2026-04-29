@@ -108,7 +108,95 @@
             </div>
             {% endif %}
             
+            {% if completed_transactions %}
+            <div style="margin-top: 40px;">
+                <h3 style="font-size: 1.2rem; font-weight: 800; color: #1F2937; margin-bottom: 20px;">Geçmiş Siparişlerini Puanla</h3>
+                <div style="display: grid; gap: 15px;">
+                    {% for tx in completed_transactions %}
+                    <div id="tx-card-{{ tx.id }}" style="background: white; border: 2px solid #E5E7EB; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <h4 style="margin: 0 0 5px 0; font-size: 1.1rem; color: #1F2937;">{{ tx.product.name }}</h4>
+                                <span style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    {{ tx.restaurant.name }}
+                                </span>
+                            </div>
+                            <div style="text-align: right; color: #7C9A6E; font-size: 0.8rem; font-weight: 700;">
+                                Teslim Alındı
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 5px;" class="rating-stars" data-tx-id="{{ tx.id }}">
+                            {% for i in range(1, 6) %}
+                            <svg class="star-icon" data-rating="{{ i }}" style="cursor: pointer; width: 24px; height: 24px; color: #D1D5DB; transition: color 0.2s;" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
         </div>
     </main>
 </div>
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.rating-stars').forEach(container => {
+    const stars = container.querySelectorAll('.star-icon');
+    const txId = container.dataset.txId;
+    
+    stars.forEach(star => {
+        // Hover
+        star.addEventListener('mouseover', function() {
+            const rating = this.dataset.rating;
+            stars.forEach(s => {
+                if (s.dataset.rating <= rating) {
+                    s.style.color = '#F59E0B'; // Sarı
+                } else {
+                    s.style.color = '#D1D5DB'; // Gri
+                }
+            });
+        });
+        
+        // Mouse out (Reset to unselected)
+        star.addEventListener('mouseout', function() {
+            stars.forEach(s => {
+                s.style.color = '#D1D5DB';
+            });
+        });
+        
+        // Click
+        star.addEventListener('click', function() {
+            const rating = this.dataset.rating;
+            
+            fetch('/api/rate_transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transaction_id: txId, rating: rating })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Yıldıza tıklandıktan sonra animasyonla kartı gizle
+                    const card = document.getElementById(`tx-card-${txId}`);
+                    card.style.transition = 'opacity 0.5s ease, height 0.5s ease';
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                        alert(data.message);
+                        window.location.reload(); // Puanı güncellemek için
+                    }, 500);
+                } else {
+                    alert(data.error);
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}
