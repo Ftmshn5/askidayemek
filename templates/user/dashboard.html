@@ -201,7 +201,9 @@
 
 {% block scripts %}
 <script>
-// Seçili ürünler
+// Seçili ürünler (Restoran bazlı)
+let cartByRestaurant = {}; // { restaurantId: [product_id1, product_id2] }
+let currentRestaurantId = null;
 let selectedProducts = [];
 let countdownInterval = null;
 const isGuest = {{ 'true' if is_guest else 'false' }};
@@ -296,7 +298,11 @@ function initMap() {
 }
 
 function openRestaurantModal(restaurantId) {
-    selectedProducts = [];
+    currentRestaurantId = restaurantId;
+    if (!cartByRestaurant[restaurantId]) {
+        cartByRestaurant[restaurantId] = [];
+    }
+    selectedProducts = cartByRestaurant[restaurantId];
     updateSelectionUI();
 
     fetch(`/api/products/${restaurantId}`)
@@ -316,6 +322,7 @@ function openRestaurantModal(restaurantId) {
                 list.innerHTML = '<p class="empty-message">Bu restoranda şu an askıda ürün bulunmuyor.</p>';
             } else {
                 data.products.forEach(p => {
+                    const isSelected = selectedProducts.includes(p.id);
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.dataset.productId = p.id;
@@ -330,11 +337,11 @@ function openRestaurantModal(restaurantId) {
                                 </div>
                             </div>
                         </div>
-                        <button class="product-select-btn" onclick="toggleProduct(${p.id}, this)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
+                        <button class="product-select-btn ${isSelected ? 'selected' : ''}" onclick="toggleProduct(${p.id}, this)">
+                            ${isSelected 
+                                ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`
+                                : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+                            }
                         </button>
                     `;
                     list.appendChild(card);
@@ -413,8 +420,10 @@ function submitRequest() {
     .then(data => {
         if (data.success) {
             showNotification(data.message, 'success');
-            selectedProducts = [];
+            cartByRestaurant[currentRestaurantId] = [];
+            selectedProducts = cartByRestaurant[currentRestaurantId];
             updateSelectionUI();
+            closeModal();
         } else {
             showNotification(data.error || 'Bir hata oluştu', 'error');
         }

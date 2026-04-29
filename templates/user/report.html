@@ -125,20 +125,58 @@
                     </div>
                     {% endif %}
                 </div>
-                <div class="chart-container">
-                    <div class="bar-chart" id="bar-chart">
-                        {% for day, count in stats.daily_stats.items() %}
-                        <div class="bar-item">
-                            <div class="bar-wrapper">
-                                <div class="bar" style="height: {{ (count / (max_day if max_day > 0 else 1)) * 100 }}%"></div>
-                            </div>
-                             <span class="bar-label">{{ t.report.day_label }} {{ loop.index }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
+                <div class="chart-container" style="height: 300px; width: 100%; position: relative;">
+                    <canvas id="communityChart"></canvas>
                 </div>
             </div>
         </div>
     </main>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('communityChart').getContext('2d');
+    const labels = [
+        {% for day in stats.daily_stats.keys() %}
+            "{{ day[-5:] }}", // YYYY-MM-DD -> MM-DD
+        {% endfor %}
+    ];
+    const data = [
+        {% for count in stats.daily_stats.values() %}
+            {{ count }},
+        {% endfor %}
+    ];
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Günlük Teslim Edilen Sipariş',
+                data: data,
+                backgroundColor: '#7C9A6E',
+                hoverBackgroundColor: '#5E7952',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

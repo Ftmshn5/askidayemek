@@ -98,7 +98,6 @@ def seed_database():
         name='Lezzet Sofrası',
         latitude=38.6748,
         longitude=39.1860,
-        rating=4.5,
         address='Üniversite Mah. Fırat Üniversitesi Kampüsü, Elazığ'
     )
 
@@ -107,7 +106,6 @@ def seed_database():
         name='Kampüs Lokantası',
         latitude=38.6780,
         longitude=39.1920,
-        rating=4.2,
         address='Kampüs Yolu Cad. No:12, Elazığ'
     )
 
@@ -116,7 +114,6 @@ def seed_database():
         name='Dayanışma Mutfağı',
         latitude=38.6710,
         longitude=39.1980,
-        rating=4.8,
         address='Merkez Mah. Dayanışma Sok. No:5, Elazığ'
     )
 
@@ -241,6 +238,7 @@ def seed_database():
             restaurant_id=products[i % len(products)].restaurant_id,
             priority_score=75.0 + (i * 2),
             status='completed',
+            user_rating=5 if i % 4 != 0 else 3,  # Bazen 3 yıldız, bazen 5 yıldız
             created_at=now - timedelta(days=day_offset, hours=i),
             matched_at=now - timedelta(days=day_offset, hours=i - 1),
             completed_at=now - timedelta(days=day_offset, hours=i - 2)
