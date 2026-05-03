@@ -1,0 +1,395 @@
+openapi: 3.0.3
+info:
+  title: Askıda Yemek (Food Bridge) API
+  version: "1.0.0"
+  description: |
+    Comprehensive OpenAPI specification for the Askıda Yemek application.
+    Use this spec with Swagger UI or Postman to explore endpoints, schemas and examples.
+servers:
+  - url: http://localhost:5000
+    description: Local development server
+security:
+  - cookieAuth: []
+tags:
+  - name: auth
+    description: Authentication and registration
+  - name: restaurants
+    description: Restaurant and product read endpoints
+  - name: owner
+    description: Owner (restaurant) operations
+  - name: user
+    description: User operations (requests, ratings)
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: |
+        Session cookie issued by `/login` (Flask-Login). In Swagger UI, use browser cookies or
+        the "Authorize" flow that sets the `session` cookie. This is a session-based auth, not JWT.
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      example:
+        error: "En az bir ürün seçmelisiniz"
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        full_name:
+          type: string
+        role:
+          type: string
+        user_type:
+          type: string
+        points:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+      example:
+        id: 1
+        username: "ahmet_yilmaz"
+        full_name: "Ahmet Yılmaz"
+        role: "user"
+        user_type: "standard"
+        points: 10
+        created_at: "2026-05-03T14:30:00Z"
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        lat:
+          type: number
+        lon:
+          type: number
+        rating:
+          type: number
+        address:
+          type: string
+        suspended_count:
+          type: integer
+        has_suspended:
+          type: boolean
+      example:
+        id: 1
+        name: "Lezzet Sofrası"
+        lat: 38.6748
+        lon: 39.1920
+        rating: 4.5
+        address: "Elazığ Merkez"
+        suspended_count: 3
+        has_suspended: true
+    Product:
+      type: object
+      properties:
+        id: { type: integer }
+        restaurant_id: { type: integer }
+        name: { type: string }
+        quantity: { type: integer }
+        original_price: { type: number }
+        price: { type: number }
+        skt_date:
+          type: string
+          description: "YYYY-MM-DD HH:MM"
+        status:
+          type: string
+      example:
+        id: 42
+        restaurant_id: 1
+        name: "Kızartılmış Tavuk"
+        quantity: 5
+        original_price: 50.0
+        price: 0.0
+        skt_date: "2026-05-04 15:30"
+        status: "suspended"
+    Transaction:
+      type: object
+      properties:
+        id: { type: integer }
+        user_id: { type: integer }
+        product_id: { type: integer }
+        restaurant_id: { type: integer }
+        priority_score: { type: number }
+        status: { type: string }
+        user_rating: { type: integer, nullable: true }
+        pin_code: { type: string, nullable: true }
+        created_at: { type: string }
+        matched_at: { type: string, nullable: true }
+        completed_at: { type: string, nullable: true }
+    TransactionCreateRespItem:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        priority_score: { type: number }
+      example:
+        id: 42
+        name: "Kızartılmış Tavuk"
+        priority_score: 85.5
+paths:
+  /api/restaurants:
+    get:
+      tags: [restaurants]
+      summary: Listele - tüm restoranlar (harita için)
+      responses:
+        '200':
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Restaurant'
+  /api/products/{restaurant_id}:
+    get:
+      tags: [restaurants]
+      summary: Belirli restoranın askıdaki ürünlerini döndür
+      parameters:
+        - name: restaurant_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Restoran ve ürün listesi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restaurant:
+                    $ref: '#/components/schemas/Restaurant'
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  queue_count:
+                    type: integer
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/request:
+    post:
+      tags: [user]
+      summary: Talep oluştur (kullanıcı)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_ids:
+                  type: array
+                  items:
+                    type: integer
+              required: [product_ids]
+            example:
+              product_ids: [42, 45]
+      responses:
+        '200':
+          description: Talep oluşturma sonucu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionCreateRespItem'
+                  matched_count: { type: integer }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/rate_transaction:
+    post:
+      tags: [user]
+      summary: İşlemi puanla (kullanıcı)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction_id: { type: integer }
+                rating: { type: integer, minimum: 1, maximum: 5 }
+            required: [transaction_id, rating]
+            example:
+              transaction_id: 15
+              rating: 5
+      responses:
+        '200':
+          description: Puan kaydedildi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/export/csv:
+    get:
+      tags: [user, owner]
+      summary: CSV dışa aktar (login required)
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: CSV dosyası (attachment)
+          content:
+            text/csv:
+              schema:
+                type: string
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /owner/product/add:
+    post:
+      tags: [owner]
+      summary: Restoran sahibi - yeni ürün ekle
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                quantity: { type: integer }
+                original_price: { type: number }
+                price: { type: number }
+                skt_date: { type: string }
+                status: { type: string }
+      responses:
+        '302':
+          description: Redirect to owner dashboard
+  /owner/product/toggle/{product_id}:
+    post:
+      tags: [owner]
+      summary: Ürün durumunu toggle et (on_sale <-> suspended)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '302': { description: Redirect }
+  /owner/delete_product/{product_id}:
+    post:
+      tags: [owner]
+      summary: Ürün sil
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '302': { description: Redirect }
+  /owner/verify_pin:
+    post:
+      tags: [owner]
+      summary: PIN doğrula ve teslimatı tamamla
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                transaction_id: { type: integer }
+                pin_code: { type: string }
+      responses:
+        '302': { description: Redirect }
+  /login:
+    post:
+      tags: [auth]
+      summary: Form tabanlı login (session cookie oluşturur)
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username: { type: string }
+                password: { type: string }
+                role: { type: string }
+            required: [username, password, role]
+      responses:
+        '302': { description: Redirect on success }
+  /register:
+    post:
+      tags: [auth]
+      summary: Kayıt ol (user veya owner)
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                full_name: { type: string }
+                username: { type: string }
+                password: { type: string }
+                role: { type: string }
+                restaurant_name: { type: string }
+            required: [full_name, username, password, role]
+      responses:
+        '302': { description: Redirect }
+  /logout:
+    get:
+      tags: [auth]
+      summary: Logout (session clear)
+      responses:
+        '302': { description: Redirect }
+components:
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: askida_swagger_ui
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./openapi.yaml:/tmp/openapi.yaml:ro
+    environment:
+      - SWAGGER_JSON=/tmp/openapi.yaml

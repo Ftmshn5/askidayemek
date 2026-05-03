@@ -1,0 +1,142 @@
+{
+  "info": {
+    "name": "Askida Yemek API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Login (form)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            { "key": "username", "value": "ahmet_yilmaz", "type": "text" },
+            { "key": "password", "value": "123456", "type": "text" },
+            { "key": "role", "value": "user", "type": "text" }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:5000/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["login"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Save session cookie to environment variable 'session_cookie'",
+              "var sc = pm.response.headers.get('set-cookie');",
+              "if (sc) {",
+              "  var m = sc.match(/session=[^;]+/);",
+              "  if (m) {",
+              "    pm.environment.set('session_cookie', m[0]);",
+              "    pm.test('session cookie saved', function(){ pm.expect(m[0]).to.exist; });",
+              "  } else {",
+              "    pm.test('set-cookie contains session', function(){ pm.expect(sc).to.include('session='); });",
+              "  }",
+              "} else {",
+              "  pm.test('set-cookie header present', function(){ pm.expect(sc).to.not.equal(null); });",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get Restaurants",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/restaurants",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api","restaurants"]
+        }
+      }
+    },
+    {
+      "name": "Get Products (by restaurant)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:5000/api/products/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api","products","1"]
+        }
+      }
+    },
+    {
+      "name": "Create Request (POST)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Cookie", "value": "{{session_cookie}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"product_ids\": [42, 45]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/request",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api","request"]
+        }
+      }
+    },
+    {
+      "name": "Rate Transaction",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Cookie", "value": "{{session_cookie}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"transaction_id\": 15,\n  \"rating\": 5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/rate_transaction",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api","rate_transaction"]
+        }
+      }
+    },
+    {
+      "name": "Export CSV",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Cookie", "value": "{{session_cookie}}" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/export/csv",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api","export","csv"]
+        }
+      }
+    }
+  ]
+}
