@@ -1,5 +1,7 @@
 # 🥣 Askıda Yemek (Food Bridge) Platformu
 
+*🌍 [Click here for the English version](README_en.md)*
+
 Askıda Yemek, gıda israfını önlemek ve toplumsal dayanışmayı artırmak amacıyla geliştirilmiş modern bir web platformudur. Restoranların gün sonunda ellerinde kalan taze ürünleri indirimli veya ücretsiz (askıda) olarak ihtiyaç sahipleriyle paylaşmasını sağlar.
 
 ## 🚀 Öne Çıkan Özellikler
